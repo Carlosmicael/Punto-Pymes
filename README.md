@@ -37,12 +37,12 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ---
 
-### 📊 **Sprint 4 – Monitoreo y control**
+###  **Sprint 4 – Monitoreo y control**
 
 
 ---
 
-### 📈 **Sprint 5 – Estadísticas y colaboración**
+###  **Sprint 5 – Estadísticas y colaboración**
 
 
 ---
@@ -66,7 +66,7 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ---
 
-## 📌 Licencia
+## Licencia
 
 Este proyecto es propiedad de **Punto Pymes**.  
 Su uso está restringido únicamente a fines de desarrollo y despliegue interno.
