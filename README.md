@@ -18,6 +18,14 @@ La aplicación ofrece un medio eficiente de **identificación mediante sensores 
 
 Lograr una **autenticación correcta y ágil** a través de la aplicación móvil, facilitando el **control de registros por empleado**, permitiendo al personal administrativo **verificar asistencias diarias**, así como **monitorear en tiempo real** la actividad de los trabajadores mediante un sistema interconectado entre el **panel de administración web** y la **app móvil**.
 
+## Objetivos Especificos
+
+* Crear un sistema de autenticación rápido y seguro para empleados y administradores.
+
+* Registrar y monitorear asistencias en tiempo real desde la app móvil.
+
+* Gestionar personal y estadísticas desde el panel administrativo para apoyar decisiones estratégicas.
+
 ---
 
 ## Planificación del Proyecto (Blackout Plan)
