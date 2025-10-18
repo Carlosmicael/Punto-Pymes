@@ -22,27 +22,27 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ## Planificación del Proyecto (Blackout Plan)
 
-###  **Sprint 1 – Inicio de sesión y acceso**
+### [**Sprint 1 – Inicio de sesión y acceso**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
 
 
 ---
 
-###  **Sprint 2 – Registro de asistencias y configuración**
+### [**Sprint 2 – Registro de asistencias y configuración**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
 
 
 ---
 
-###  **Sprint 3 – Visualización y notificaciones**
+### [**Sprint 3 – Visualización y notificaciones**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
 
 
 ---
 
-###  **Sprint 4 – Monitoreo y control**
+### [**Sprint 4 – Monitoreo y control**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
 
 
 ---
 
-###  **Sprint 5 – Estadísticas y colaboración**
+### [**Sprint 5 – Estadísticas y colaboración**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
 
 
 ---
