@@ -55,6 +55,10 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ---
 
+## Modelo de baja Fidelidad
+
+https://www.figma.com/design/jL9BWBj6b5HCjNcvSbjpyU/Untitled?node-id=0-1&t=wqov9ejS3BHSLa0n-1
+
 ## ⚙️ Tecnologías Utilizadas
 
 - **Flutter** (Frontend móvil)
