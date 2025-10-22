@@ -55,9 +55,10 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ---
 
-## Modelo de baja Fidelidad
+## Modelo de baja Fidelidad (Figma)
 
-https://www.figma.com/design/jL9BWBj6b5HCjNcvSbjpyU/Untitled?node-id=0-1&t=wqov9ejS3BHSLa0n-1
+### [**AuthCompany and Administrador **](https://github.com/Carlosmicael/Punto-Pymes/wiki/Modelo-de-Baja-Fidelidad)
+
 
 ## ⚙️ Tecnologías Utilizadas
 
