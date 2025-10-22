@@ -26,6 +26,13 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 * Gestionar personal y estadísticas desde el panel administrativo para apoyar decisiones estratégicas.
 
+
+---
+
+## Home
+
+### [**Proyecto y Equipo**](https://github.com/Carlosmicael/Punto-Pymes/wiki)
+
 ---
 
 ## Planificación del Proyecto (Blackout Plan)
