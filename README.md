@@ -35,6 +35,18 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ---
 
+## Modelo de baja Fidelidad (Figma)
+
+### [**AuthCompany and Administrador**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Modelo-de-Baja-Fidelidad)
+
+---
+
+## Modelo de Alta Fidelidad (Figma)
+
+### [**AuthCompany and Administrador**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Modelo-de-Alta-Fidelidad)
+
+---
+
 ## Planificación del Proyecto (Blackout Plan)
 
 ### [**Sprint 1 – Inicio de sesión y acceso**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
@@ -60,17 +72,6 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 ### [**Sprint 5 – Estadísticas y colaboración**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
 
 
----
-
-## Modelo de baja Fidelidad (Figma)
-
-### [**AuthCompany and Administrador**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Modelo-de-Baja-Fidelidad)
-
----
-
-## Modelo de Alta Fidelidad (Figma)
-
-### [**AuthCompany**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Modelo-de-Alta-Fidelidad)
 
 ---
 ## ⚙️ Tecnologías Utilizadas
