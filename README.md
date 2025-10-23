@@ -26,6 +26,13 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 * Gestionar personal y estadísticas desde el panel administrativo para apoyar decisiones estratégicas.
 
+
+---
+
+## Home
+
+### [**Proyecto y Equipo**](https://github.com/Carlosmicael/Punto-Pymes/wiki)
+
 ---
 
 ## Planificación del Proyecto (Blackout Plan)
@@ -55,6 +62,17 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ---
 
+## Modelo de baja Fidelidad (Figma)
+
+### [**AuthCompany and Administrador**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Modelo-de-Baja-Fidelidad)
+
+---
+
+## Modelo de Alta Fidelidad (Figma)
+
+### [**AuthCompany**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Modelo-de-Alta-Fidelidad)
+
+---
 ## ⚙️ Tecnologías Utilizadas
 
 - **Flutter** (Frontend móvil)
