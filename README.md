@@ -47,7 +47,7 @@ Lograr una **autenticación correcta y ágil** a través de la aplicación móvi
 
 ---
 
-## Planificación del Proyecto (Blackout Plan)
+## Planificación del Proyecto (Blacklog Plan)
 
 ### [**Sprint 1 – Inicio de sesión y acceso**](https://github.com/Carlosmicael/Punto-Pymes/wiki/Planificación)
 
