@@ -71,8 +71,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   width: screenWidth,
                   height: screenHeight,
                   child: FittedBox(
-                  fit: BoxFit.cover, // 👈 llena y corta los bordes automáticamente
-                  alignment: Alignment.topCenter, // 👈 prioriza la parte superior
+                  fit: BoxFit.cover, 
+                  alignment: Alignment.topCenter, 
                   child: SizedBox(
                     width: _controller.value.size.width,
                     height: _controller.value.size.height,
