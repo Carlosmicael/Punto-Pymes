@@ -1,3 +1,4 @@
+import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -60,6 +61,7 @@ class AppDrawer extends StatelessWidget {
             ),
             onTap: () {
               Navigator.pop(context);
+              Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
           ),
         ],

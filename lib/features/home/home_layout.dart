@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'drawer.dart';
 import 'footer.dart';
+import 'app_bar.dart';
 
 class HomeLayout extends StatelessWidget {
   final Widget child;
@@ -10,20 +11,36 @@ class HomeLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Punto Pymes'),
-        backgroundColor: Colors.blueAccent,
-        automaticallyImplyLeading: true,
-      ),
+      extendBodyBehindAppBar: true,
+      appBar: CustomHomeAppBar(),
       drawer: const AppDrawer(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(child: child),
-            const Footer(),
-          ],
-        ),
+      body: Stack(
+        children: [
+          child,
+          const Positioned(left: 0,right: 0,bottom: 0,child: FloatingFooter(),),
+        ],
       ),
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
