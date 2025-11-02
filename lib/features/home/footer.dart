@@ -1,16 +1,185 @@
+import 'package:auth_company/features/home/home_layout.dart';
+import 'package:auth_company/features/home/views/home_screen.dart';
+import 'package:auth_company/features/home/views/user_perfil.dart';
+import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 
-class FloatingFooter extends StatelessWidget {
-  const FloatingFooter({super.key});
+class NavItem {
+  final String label;
+  final String iconPath;
+
+  NavItem(this.label, this.iconPath);
+}
+
+final List<NavItem> _navItems = [
+  NavItem('Home', 'lib/assets/icons/iconHome.png'),
+  NavItem('User', 'lib/assets/icons/iconUser.png'),
+  NavItem('Capas', 'lib/assets/icons/iconCapas.png'),
+];
+
+
+
+//esta funcion este widget nos devuelve la pantalla a donde queremos ir
+Widget _getScreenWidget(String routeName) {
+  switch (routeName) {
+    case AppRoutes.home:
+      return const HomeScreen();
+    case AppRoutes.profile:
+      return const ProfileScreen();
+    // Agrega Capas
+    // case AppRoutes.capas:
+    //   return const CapasScreen(); 
+    default:
+      return const HomeScreen(); 
+  }
+}
+
+
+
+//esta lista contiene las rutas de los iconos
+final List<String> _navItemsRoutes = [AppRoutes.home,AppRoutes.profile,AppRoutes.capas,];
+
+
+class AnimatedFloatingFooter extends StatefulWidget {
+  final int initialIndex; 
+  const AnimatedFloatingFooter({super.key, this.initialIndex = 0});
+
+  @override
+  State<AnimatedFloatingFooter> createState() => _AnimatedFloatingFooterState();
+}
+
+
+
+
+class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
+  late int _selectedIndex;
+  int _tappedIndex = -1;
+  
+  final Duration _fadeDuration = const Duration(milliseconds: 300);
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex; 
+  }
+  
+
+  //funcion sirve para seleccionar un item
+  void _onItemTapped(int index) async {
+    if (_selectedIndex == index || _tappedIndex != -1) return;
+
+    setState(() {_tappedIndex = index;});
+
+    setState(() {
+      _selectedIndex = index;
+      _tappedIndex = -1; 
+    });
+
+    //rutas de direccion de los 3 iconos 
+    final String route = _navItemsRoutes[index];
+    final Widget destinationScreen = _getScreenWidget(route);
+
+    //aqui no utilizo el Navigator.pushNamed por que necesito meterle una transicion de cmabio de pantallas
+    //por lo mimso debo crear el widget manualmente como el siguiente:
+    final Widget wrappedScreen = HomeLayout(initialIndex: index,child: destinationScreen,);
+
+    //aqui navego con una transicion Fade de 300 milisegundos y llamao a la pantalla wrappedScreen que es el HomeLayout
+    //pero dentro del HomeLayout la pantalla a renderizar es destinationScreen y esta variable guarda HomeScreen() o ProfileScreen() etc..
+    await Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 300), 
+        pageBuilder: (context, animation, secondaryAnimation) => wrappedScreen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {return FadeTransition(opacity: animation,child: child,);
+        },
+      ),
+    );
+    
+  }
+
+
+
+  Widget _buildNavItem(int index, double iconSize, double iconAreaWidth, double width) {
+    final NavItem item = _navItems[index];
+    final bool isSelected = _selectedIndex == index;
+    
+    final double targetOpacity = _tappedIndex == index ? 0.0 : 1.0;
+
+    final double extraMargin = width * 0.025;
+
+    final Widget leftSpacer = (index == 0) ? SizedBox(width: extraMargin) : const SizedBox.shrink();
+    final Widget rightSpacer = (index == 2) ? SizedBox(width: extraMargin) : const SizedBox.shrink();
+
+
+    return InkWell(
+      onTap: () => _onItemTapped(index),
+
+      child: Container(
+        width: iconAreaWidth,
+        height: iconAreaWidth,
+        alignment: Alignment.center,
+        child: isSelected
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  leftSpacer, 
+
+                  Container(width: iconSize * 0.8,height: iconSize * 0.8, child: Image.asset(item.iconPath, color: Colors.black, fit: BoxFit.contain),),
+
+                  SizedBox(width: width * 0.012),
+                  Text(item.label,style: TextStyle(color: Colors.black,fontSize: iconSize * 0.5,fontWeight: FontWeight.w600,),),
+
+                  SizedBox(width: width * 0.008),
+                  Container(width: width * 0.018, height: width * 0.018,decoration: const BoxDecoration(color: Colors.green,shape: BoxShape.circle,),),
+
+                  rightSpacer,
+                ],
+              )
+
+            : AnimatedOpacity(
+                duration: _fadeDuration, 
+                curve: Curves.easeInOut, 
+                opacity: targetOpacity,
+                child: Container( width: iconSize,height: iconSize,child: Image.asset(item.iconPath, color: Colors.white, fit: BoxFit.contain),),
+            ),
+      ),
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.of(context).size.width;
     final double height = MediaQuery.of(context).size.height;
 
+    
+
+    //tamaño de los iconos y calculos de responsividad//
     final double iconSize = height * 0.028; 
     final double containerHeight = height * 0.075;
-    final double containerWidth = width * 0.57;
+    final double navBarWidth = width * 0.60;     
+    final double pointerHeight = containerHeight * 0.6; 
+    final double pointerWidth = navBarWidth * 0.38;   
+    final double iconAreaWidth = navBarWidth / _navItems.length;
+
+    final double _POSITION_OFFSET = width * 0.035;
+
+    final double center0 = iconAreaWidth / 2;
+    final double center1 = iconAreaWidth * 1.5;
+    final double center2 = iconAreaWidth * 2.5;
+
+    final double left0 = center0 - (pointerWidth / 2) + _POSITION_OFFSET; 
+    
+    final double left1 = center1 - (pointerWidth / 2);
+    
+    final double left2 = center2 - (pointerWidth / 2) - _POSITION_OFFSET;
+
+
+
+
+    //este seria el movimiento que hace el cuadro blanco calculado dinamicamente y pasado al animate
+    final double targetLeft = _selectedIndex == 0 ? left0 : _selectedIndex == 1 ? left1 : left2;
 
     return Container(
       height: height * 0.15,
@@ -20,155 +189,69 @@ class FloatingFooter extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Contenedor principal del footer
             Stack(
-              alignment: Alignment.center,
+              alignment: Alignment.centerLeft,
               children: [
-                // Rectángulo negro principal
+
+
+                //cuadro negro apilado como base
                 Container(
-                  width: containerWidth,
+                  width: navBarWidth,
                   height: containerHeight,
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(height * 0.04),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black38,
-                        offset: Offset(0, 4),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Icono Home (con más espacio a la izquierda)
-                      Container(
-                        margin: EdgeInsets.only(left: width * 0.04), // Más espacio a la izquierda
-                        width: iconSize,
-                        height: iconSize,
-                        child: Image.asset(
-                          'lib/assets/icons/iconHome.png',
-                          color: Colors.white,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      
-                      // Contenedor para User y Capas juntos
-                      Row(
-                        children: [
-                          // Icono User
-                          Container(
-                            margin: EdgeInsets.only(right: width * 0.03), // Espacio entre User y Capas
-                            width: iconSize,
-                            height: iconSize,
-                            child: Image.asset(
-                              'lib/assets/icons/iconUser.png',
-                              color: Colors.white,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          
-                          // Icono Settings (Capas)
-                          Container(
-                            margin: EdgeInsets.only(right: width * 0.09), // Espacio a la derecha
-                            width: iconSize,
-                            height: iconSize,
-                            child: Image.asset(
-                              'lib/assets/icons/iconCapas.png',
-                              color: Colors.white,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    boxShadow: const [BoxShadow(color: Colors.black38,offset: Offset(0, 4),blurRadius: 10,),],
                   ),
                 ),
 
-                // Rectángulo blanco superpuesto ENCIMA del icono Home
-                Positioned(
-                  left: containerWidth * 0.06, // Ajustado por el nuevo espaciado
-                  child: Container(
-                    width: containerWidth * 0.4, // Ancho aumentado a 0.4
-                    height: containerHeight * 0.6,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(height * 0.025),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 2),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Icono Home dentro del rectángulo blanco
-                        Container(
-                          width: iconSize * 0.8,
-                          height: iconSize * 0.8,
-                          child: Image.asset(
-                            'lib/assets/icons/iconHome.png',
-                            color: Colors.black,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        SizedBox(width: width * 0.012),
-                        Text(
-                          'Home',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: height * 0.014,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(width: width * 0.008),
-                        // Punto verde pequeño
-                        Container(
-                          width: height * 0.007,
-                          height: height * 0.007,
-                          decoration: const BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ],
-                    ),
+
+                //cuadro blanco que se mueve segunda base
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300), 
+                  curve: Curves.easeInOutQuart,
+                  left: targetLeft, 
+                  top: (containerHeight - pointerHeight) / 2,
+                  width: pointerWidth,
+                  height: pointerHeight,
+                  child: Container(decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.circular(height * 0.025),),),
+                ),
+
+
+
+
+                //ultima base los iconos los 3 iconos incluyendo el texto y circulo verde
+                Container(
+                  width: navBarWidth,
+                  height: containerHeight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildNavItem( 0, iconSize, iconAreaWidth, width),
+                      _buildNavItem( 1, iconSize, iconAreaWidth, width),
+                      _buildNavItem( 2, iconSize, iconAreaWidth, width),
+                    ],
                   ),
                 ),
               ],
             ),
-
             SizedBox(width: width * 0.03),
 
-            // Círculo negro con icono de cámara
+
+            //circulo negro con icono de camara
             Container(
               width: containerHeight, 
               height: containerHeight,
               decoration: BoxDecoration(
                 color: Colors.black,
                 shape: BoxShape.circle,
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black38,
-                    offset: Offset(0, 4),
-                    blurRadius: 10,
-                  ),
-                ],
+                boxShadow: const [BoxShadow(color: Colors.black38,offset: Offset(0, 4),blurRadius: 10,),],
               ),
               child: Center(
                 child: Container(
                   width: iconSize * 0.9, 
                   height: iconSize * 0.9,
-                  child: Image.asset(
-                    'lib/assets/icons/iconCapture.png',
-                    color: Colors.white,
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.asset('lib/assets/icons/iconCapture.png',color: Colors.white,fit: BoxFit.contain,),
                 ),
               ),
             ),

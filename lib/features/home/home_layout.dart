@@ -6,7 +6,9 @@ import 'app_bar.dart';
 class HomeLayout extends StatelessWidget {
   final Widget child;
 
-  const HomeLayout({super.key, required this.child});
+  const HomeLayout({super.key, required this.child, this.initialIndex});
+
+  final int? initialIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -17,30 +19,14 @@ class HomeLayout extends StatelessWidget {
       body: Stack(
         children: [
           child,
-          const Positioned(left: 0,right: 0,bottom: 0,child: FloatingFooter(),),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: AnimatedFloatingFooter(initialIndex: initialIndex ?? 0),
+          ),
         ],
       ),
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

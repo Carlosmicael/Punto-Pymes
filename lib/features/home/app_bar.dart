@@ -30,16 +30,35 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.menu, color: Colors.white, size:  30),
-                      onPressed: () => Scaffold.of(context).openDrawer(), 
+
+                    Container(
+                        width: width * 0.09, 
+                        height: width * 0.09, 
+                        decoration: BoxDecoration(color: Colors.black,borderRadius: BorderRadius.circular(10),),
+                        child: IconButton(
+                        icon: const Icon(Icons.menu, color: Colors.white, size: 30),
+                        onPressed: () => Scaffold.of(context).openDrawer(), 
+                        padding: EdgeInsets.zero, ),
                     ),
                     Row(
                       children: [
-                        const Icon(Icons.notifications_none, color: Colors.white, size: 30),
+                        Container(
+                            width: width * 0.10, 
+                            height: width * 0.10, 
+                            decoration: const BoxDecoration(color: Colors.black,shape: BoxShape.circle,),
+                            child:  Center(child: Icon(Icons.notifications_none, color: Colors.white, size: 30),),
+                        ),
+                        
                         SizedBox(width: width * 0.04),
-                        Container(width: width * 0.10,height: width * 0.10,
-                          decoration: const BoxDecoration(color: Colors.white,shape: BoxShape.circle,),
+                        Container(
+                          width: width * 0.12, 
+                          height: width * 0.12, 
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4),blurRadius: 15,offset: const Offset(0, 5),),],
+                            image: DecorationImage(image: NetworkImage('https://i.pinimg.com/564x/bb/dd/e3/bbdde34ccf2b181ba62d1d42ba002c5b.jpg',),fit: BoxFit.cover, ),
+                          ),
                         ),
                       ],
                     ),
