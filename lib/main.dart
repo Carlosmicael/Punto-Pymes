@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'screens/home.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,9 +10,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      title: 'Punto Pymes',
+      routes: {'/': (_) => Home()},
+      initialRoute: '/',
     );
   }
 }

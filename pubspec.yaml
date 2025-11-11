@@ -30,11 +30,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  flutter_svg: ^2.1.1
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   lottie: ^2.2.0
+  flutter_carousel_widget: ^3.1.0
+  infinite_carousel: ^1.1.1
+  carousel_slider_plus: ^7.1.1
 
 dev_dependencies:
   flutter_test:
@@ -58,5 +61,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - lib/assets/
+    - lib/assets/1.svg
     - lib/assets/animaciones/loading.json
     - lib/assets/animaciones/authCompany.json
