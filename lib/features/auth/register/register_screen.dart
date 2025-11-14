@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:auth_company/features/auth/register/register_service.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -105,30 +107,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
 
   //pagina principal de finalizacion
-  void _nextPage() {
-    GlobalKey<FormState>? currentFormKey;
+void _nextPage() {
+  GlobalKey<FormState>? currentFormKey;
 
   if (_currentPage == 0) {
     currentFormKey = _formKey;
-
   } else if (_currentPage == 2) {
     currentFormKey = _formKey2;
-
   } else if (_currentPage == 3) {
     currentFormKey = _formKey3;
   }
-  
+
+  // Si no hay formulario a validar O la validación es exitosa
   if (currentFormKey == null || currentFormKey.currentState?.validate() == true) {
 
-    if (_currentPage == 4)_currentPage = 6;
-
+    if (_currentPage == 4) { // <-- Lógica al presionar "Finalizar"
+        // Ejecutar la lógica de SUBIDA DE DATOS
+        _prepareAndSubmitData();
+        return; // Detener la navegación de PageView, que será manejada por _prepareAndSubmitData() si es exitoso
+    }
     
-    if (_currentPage < 5) {
+    // Lógica original para avanzar las primeras 4 páginas
+    if (_currentPage < 4) {
       _pageController.nextPage( duration: const Duration(milliseconds: 100),curve: Curves.easeInOut,);
-    } else {
-      _pageController.nextPage( duration: const Duration(milliseconds: 100),curve: Curves.easeInOut,);
-      Future.delayed(const Duration(milliseconds: 600), () => setState(() =>_isFinished = true));
-      Future.delayed(const Duration(milliseconds: 2100), ()=>({if (mounted)Navigator.pushReplacementNamed(context, AppRoutes.splashWelcome)}));
+    } 
+    // La página 5 (_buildFivePage) NO tiene validación, así que avanza
+    else if (_currentPage == 5) { 
+        // Esta es la página final del PageView, que lanza la animación
+        // Si llegamos aquí, fue porque _prepareAndSubmitData fue exitoso.
+        _pageController.nextPage( duration: const Duration(milliseconds: 100),curve: Curves.easeInOut,);
+        Future.delayed(const Duration(milliseconds: 600), () => setState(() =>_isFinished = true));
+        Future.delayed(const Duration(milliseconds: 2100), ()=>({if (mounted)Navigator.pushReplacementNamed(context, AppRoutes.splashWelcome)}));
     }
   }
 }
@@ -234,6 +243,81 @@ Future<void> _determinePosition() async {
     }
   }
 */
+
+// 1. Inicializar el servicio
+final RegisterService _registerService = RegisterService();
+// 2. Estado para el loading
+bool _isLoading = false;
+// Función para convertir la imagen a Base64
+String? _getImageBase64() {
+  if (_imageFile == null) {
+    return null;
+  }
+  final bytes = _imageFile!.readAsBytesSync();
+  return base64Encode(bytes);
+}
+
+// Función principal para preparar y enviar la solicitud al backend
+Future<void> _prepareAndSubmitData() async {
+  // 1. Validar el último formulario (aunque el PageView avanza sin él, por seguridad)
+  if (_formKey3.currentState?.validate() == false) {
+      return; 
+  }
+
+  // 2. Recopilar y estructurar todos los datos del frontend
+  final userData = {
+    // Datos Personales
+    "nombres": _nombresController.text,
+    "apellidos": _apellidosController.text,
+    "cedula": _cedulaController.text,
+    "correo": _correoController.text,
+    "telefono": _telefonoController.text,
+    
+    // Datos Demográficos
+    "genero": _selectedGender?.toString().split('.').last, // 'masculino' o 'femenino'
+    "fechaNacimiento": _selectedDate.toIso8601String(), // Formato estándar de fecha/hora
+
+    // Credenciales de Cuenta
+    "usuario": _usuarioController.text,
+    "contrasena": _contrasenaController.text, // Solo enviar la contraseña principal
+    
+    // Información de la Empresa
+    "ruc": _empresaController.text,
+    "sucursal": _sucursalController.text,
+    // Coordenadas
+    "lat": _mapCenter.latitude,
+    "lng": _mapCenter.longitude,
+    
+    // Foto de Perfil (como Base64 String)
+    "fotoPerfilBase64": _getImageBase64(), 
+  };
+
+  setState(() => _isLoading = true);
+  
+  // 3. Llamar al servicio
+  final result = await _registerService.register(userData);
+  
+  setState(() => _isLoading = false);
+
+  if (result != null) {
+    // 4. Éxito: Simular la finalización del registro y navegar
+    _pageController.nextPage(duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+    
+    // El resto de la lógica de finalización ya está en _nextPage()
+
+  } else {
+    // 5. Fracaso: Mostrar un mensaje de error (ej: el correo ya existe, error del backend)
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error en el registro. Verifique sus datos o intente más tarde.')),
+      );
+    }
+    // Opcionalmente, puedes volver a la página de credenciales si el error es de usuario/contraseña
+  }
+}
+
+
+
 
 @override
   void initState() {
