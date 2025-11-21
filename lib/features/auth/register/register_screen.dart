@@ -292,6 +292,7 @@ Future<void> _prepareAndSubmitData() async {
     "fotoPerfilBase64": _getImageBase64(), 
   };
 
+  try{
   setState(() => _isLoading = true);
   
   // 3. Llamar al servicio
@@ -314,6 +315,18 @@ Future<void> _prepareAndSubmitData() async {
     }
     // Opcionalmente, puedes volver a la página de credenciales si el error es de usuario/contraseña
   }
+  } catch (e) {
+  setState(() => _isLoading = false);
+  // Muestra el mensaje REAL del backend (ej: "El usuario ya existe")
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString().replaceAll('Exception: ', '')),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
 }
 
 

@@ -6,4 +6,7 @@ class AppRoutes {
   static const splashWelcome = '/splash-welcome';
   static const profile = '/profile';
   static const capas = '/capas';
+
+//  static const userPerfil = '/userPerfil';
+  static const registro = '/registro';
 }

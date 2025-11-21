@@ -1,3 +1,4 @@
+import 'package:auth_company/features/auth/login/login_service.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 
@@ -17,9 +18,7 @@ class AppDrawer extends StatelessWidget {
         padding: EdgeInsets.zero,
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blueAccent,
-            ),
+            decoration: BoxDecoration(color: Color.fromARGB(255, 100, 14, 8)),
             child: Center(
               child: Text(
                 'Menú principal',
@@ -34,6 +33,28 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.home_outlined),
             title: const Text('Inicio'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.store),
+            title: const Text('Sucursales'),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.add),
+            title: const Text('Registro Assistencia'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, AppRoutes.registro); 
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.list),
+            title: const Text('Historial de registros'),
             onTap: () {
               Navigator.pop(context);
             },
@@ -59,8 +80,14 @@ class AppDrawer extends StatelessWidget {
               'Cerrar sesión',
               style: TextStyle(color: Colors.redAccent),
             ),
-            onTap: () {
-              Navigator.pop(context);
+            onTap: () async {
+              Navigator.pop(context); // Cierra el Drawer
+
+              // 1. Eliminar token guardado
+              await LoginService().clearToken();
+              print("Token eliminado correctamente");
+
+              // 2. Navegar al login
               Navigator.pushReplacementNamed(context, AppRoutes.login);
             },
           ),

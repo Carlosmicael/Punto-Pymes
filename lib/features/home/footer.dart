@@ -1,6 +1,6 @@
 import 'package:auth_company/features/home/home_layout.dart';
 import 'package:auth_company/features/home/views/home_screen.dart';
-import 'package:auth_company/features/home/views/user_perfil.dart';
+import 'package:auth_company/features/user/views/user_perfil.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 
@@ -20,12 +20,17 @@ final List<NavItem> _navItems = [
 
 
 //esta funcion este widget nos devuelve la pantalla a donde queremos ir
-Widget _getScreenWidget(String routeName) {
+Widget _getScreenWidget(String routeName, String? uid) {
   switch (routeName) {
     case AppRoutes.home:
       return const HomeScreen();
     case AppRoutes.profile:
-      return const ProfileScreen();
+      // Comprobar que el uid no sea nulo antes de usarlo.
+      if (uid == null) {
+          return const Center(child: Text('Error: UID de usuario no disponible para el perfil.'));
+      }
+      // Pasar el argumento requerido 'uid'
+      return ProfileScreen(uid: uid);
     // Agrega Capas
     // case AppRoutes.capas:
     //   return const CapasScreen(); 
@@ -42,7 +47,8 @@ final List<String> _navItemsRoutes = [AppRoutes.home,AppRoutes.profile,AppRoutes
 
 class AnimatedFloatingFooter extends StatefulWidget {
   final int initialIndex; 
-  const AnimatedFloatingFooter({super.key, this.initialIndex = 0});
+  final String? uid;
+  const AnimatedFloatingFooter({super.key, this.initialIndex = 0, this.uid});
 
   @override
   State<AnimatedFloatingFooter> createState() => _AnimatedFloatingFooterState();
@@ -77,7 +83,9 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
 
     //rutas de direccion de los 3 iconos 
     final String route = _navItemsRoutes[index];
-    final Widget destinationScreen = _getScreenWidget(route);
+
+    // Pasar widget.uid a la función _getScreenWidget
+    final Widget destinationScreen = _getScreenWidget(route, widget.uid);
 
     //aqui no utilizo el Navigator.pushNamed por que necesito meterle una transicion de cmabio de pantallas
     //por lo mimso debo crear el widget manualmente como el siguiente:

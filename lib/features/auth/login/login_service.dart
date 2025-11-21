@@ -24,10 +24,12 @@ class LoginService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
       final token = data["access_token"];
+      final uid = data["uid"]; 
 
-      // Guardar token en SharedPreferences
+      // Guardar token y UID en SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("access_token", token);
+      await prefs.setString("user_uid", uid); 
 
       return token;
     } else {
@@ -46,5 +48,11 @@ class LoginService {
   Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove("access_token");
+  }
+
+  /// Recupera el UID guardado en SharedPreferences
+  Future<String?> getSavedUid() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString("user_uid");
   }
 }

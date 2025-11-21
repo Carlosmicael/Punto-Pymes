@@ -1,3 +1,4 @@
+import 'package:auth_company/features/registro/views/selector_registro.dart';
 import 'package:flutter/material.dart';
 import 'routes/app_routes.dart';
 import 'features/auth/splash_screen.dart';
@@ -22,6 +23,9 @@ class HomeApp extends StatelessWidget {
         AppRoutes.register: (context) => const RegisterScreen(),
         AppRoutes.home: (context) => const HomeLayout(child: HomeScreen()),
         AppRoutes.splashWelcome: (context) => const StartScreen(),
+
+        //AppRoutes.profile: (context) => ProfileScreen(uid: ),
+        AppRoutes.registro: (context) => SelectorRegistro(),
       },
     );
   }
