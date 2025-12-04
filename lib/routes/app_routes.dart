@@ -10,4 +10,6 @@ class AppRoutes {
   static const horario = '/horario';
   static const capas = '/capas';
   static const sucursal = '/sucursal';
+  static const registroExitoso = '/registroExitoso';
+  static const registroScan = '/registroScan';
 }

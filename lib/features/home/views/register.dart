@@ -1,5 +1,7 @@
+import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:ui';
 
 class RegistroEmpleados extends StatefulWidget {
   const RegistroEmpleados({super.key});
@@ -27,12 +29,16 @@ class _RegistroState extends State<RegistroEmpleados> {
 }
 
 // 🔹 APPBAR SEPARADO
-
 class CustomRegisterAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final bool showGradient;
+  final double? heightFactor; // Factor para ajustar la altura según pantalla
 
-  const CustomRegisterAppBar({super.key, required this.showGradient});
+  const CustomRegisterAppBar({
+    super.key,
+    required this.showGradient,
+    this.heightFactor = 0.15, // Por defecto 8% de la altura de la pantalla
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -40,15 +46,17 @@ class CustomRegisterAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final height = size.height;
     final width = size.width;
+    final height = size.height * heightFactor!; // Altura responsiva
 
-    final bottomPadding = height * 0.03;
-    final iconSize = width * 0.075;
-    final fontSize = width * 0.045;
+    final iconSize = width * 0.05; // Icono responsivo
+    final fontSize = width * 0.03; // Texto responsivo
+    final topPadding = height * 0.12; // Ajusta este valor según necesites
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
+      height: height,
+      padding: EdgeInsets.symmetric(horizontal: width * 0.08),
       decoration: BoxDecoration(
         gradient:
             showGradient
@@ -59,41 +67,30 @@ class CustomRegisterAppBar extends StatelessWidget
                 )
                 : null,
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
+          bottomLeft: Radius.circular(25),
+          bottomRight: Radius.circular(25),
         ),
       ),
-      child: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Align(
-          alignment: Alignment.bottomLeft,
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: width * 0.05, // 5% del ancho
-              bottom: bottomPadding, // 🔹 ahora responsivo
-            ),
-            child: Row(
-              children: [
-                SizedBox(width: width * 0.08),
-                SvgPicture.asset(
-                  'lib/assets/images/Registro.svg',
-                  width: iconSize,
-                  height: iconSize,
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: topPadding), // Espacio desde arriba
+          child: Row(
+            children: [
+              SvgPicture.asset(
+                'lib/assets/images/Registro.svg',
+                width: iconSize,
+                height: iconSize,
+              ),
+              SizedBox(width: width * 0.02), // Espacio entre SVG y texto
+              Text(
+                "Registro",
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-                SizedBox(width: width * 0.04),
-                Text(
-                  'Registro',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: fontSize,
-                    letterSpacing: width * 0.01,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -122,6 +119,8 @@ class RegisterBody extends StatelessWidget {
     final width = size.width;
     final height = size.height;
     final textScale = MediaQuery.of(context).textScaleFactor;
+    final iconSize = width * 0.075;
+    final fontSize = width * 0.045;
 
     return NotificationListener<ScrollNotification>(
       onNotification: (scroll) {
@@ -136,7 +135,7 @@ class RegisterBody extends StatelessWidget {
               clipper: _CurvedBottomClipper(),
               child: Container(
                 width: width,
-                height: height * 0.45,
+                height: height * 0.55,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFF370B12), Color(0xFFE41335)],
@@ -384,10 +383,45 @@ class RegisterBody extends StatelessWidget {
                                       elevation: 8,
                                       padding: EdgeInsets.symmetric(
                                         horizontal: width * 0.06,
-                                        vertical: height * 0.018,
+                                        vertical: height * 0.02,
                                       ),
                                     ),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      showGeneralDialog(
+                                        context: context,
+                                        barrierColor:
+                                            Colors
+                                                .transparent, // Fondo transparente
+                                        barrierDismissible: false,
+                                        barrierLabel: "Registro",
+                                        transitionDuration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        pageBuilder: (
+                                          context,
+                                          animation1,
+                                          animation2,
+                                        ) {
+                                          return RegistroModal(
+                                            texto: "Registro1",
+                                          );
+                                        },
+                                        transitionBuilder: (
+                                          context,
+                                          anim1,
+                                          anim2,
+                                          child,
+                                        ) {
+                                          return Transform.scale(
+                                            scale: anim1.value,
+                                            child: Opacity(
+                                              opacity: anim1.value,
+                                              child: child,
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -400,8 +434,8 @@ class RegisterBody extends StatelessWidget {
                                         ),
                                         SizedBox(width: width * 0.05),
                                         Container(
-                                          width: width * 0.09,
-                                          height: width * 0.09,
+                                          width: width * 0.07,
+                                          height: width * 0.07,
                                           decoration: const BoxDecoration(
                                             color: Color.fromARGB(
                                               133,
@@ -414,8 +448,8 @@ class RegisterBody extends StatelessWidget {
                                           child: Center(
                                             child: SvgPicture.asset(
                                               'lib/assets/images/Siguiente.svg',
-                                              width: width * 0.04,
-                                              height: width * 0.04,
+                                              width: width * 0.03,
+                                              height: width * 0.03,
                                             ),
                                           ),
                                         ),
@@ -458,4 +492,232 @@ class _CurvedBottomClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
+
+class RegistroModal extends StatelessWidget {
+  final String texto; // Texto dentro del cuadro
+  const RegistroModal({super.key, required this.texto});
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width = size.width;
+    final height = size.height;
+
+    return Center(
+      child: Material(
+        color: Colors.transparent, // Fondo transparente
+        child: Container(
+          width: width * 0.90,
+          padding: EdgeInsets.all(width * 0.05),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(42, 23, 23, 23),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                padding: EdgeInsets.all(width * 0.05),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Cuadro interno superior con texto y botón cerrar
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: height * 0.02,
+                        horizontal: width * 0.07,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(220, 0, 0, 0),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              texto,
+                              style: TextStyle(
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                fontSize: width * 0.045,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          // Botón circular para cerrar
+                          Container(
+                            width: width * 0.1,
+                            height: width * 0.1,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white24,
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size:
+                                    width *
+                                    0.06, // tamaño del ícono proporcional al ancho
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.02),
+
+                    // Hora de entrada
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Hora de entrada:",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: width * 0.04,
+                          ),
+                        ),
+                        Text(
+                          "12:00 AM",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: width * 0.045,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: height * 0.015),
+
+                    // Hora de salida
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Hora de salida:",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: width * 0.04,
+                          ),
+                        ),
+                        Text(
+                          "12:00 PM",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: width * 0.045,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: height * 0.03),
+
+                    // Botón 1
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, AppRoutes.registroScan);
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(
+                              vertical: height * 0.018,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(205, 255, 255, 255),
+                              borderRadius: BorderRadius.circular(50),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color.fromARGB(
+                                    73,
+                                    0,
+                                    0,
+                                    0,
+                                  ), // sombra oscura
+                                  blurRadius: 10, // difuminado
+                                  offset: Offset(
+                                    0,
+                                    5,
+                                  ), // desplazamiento vertical
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                "Entrada",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: width * 0.035,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: height * 0.015),
+
+                    // Botón 2
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            vertical: height * 0.018,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(205, 255, 255, 255),
+                            borderRadius: BorderRadius.circular(50),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(
+                                  73,
+                                  0,
+                                  0,
+                                  0,
+                                ), // sombra oscura
+                                blurRadius: 10, // difuminado
+                                offset: const Offset(
+                                  0,
+                                  5,
+                                ), // desplazamiento vertical
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Salida",
+                              style: TextStyle(
+                                color: const Color.fromARGB(255, 0, 0, 0),
+                                fontSize: width * 0.035,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

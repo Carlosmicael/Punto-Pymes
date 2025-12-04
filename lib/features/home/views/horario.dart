@@ -172,7 +172,6 @@ class HorarioS extends State<Horario> {
                     const SizedBox(height: 5),
 
                     // Carrusel circular de meses
-                    // Carrusel circular de meses
                     SizedBox(
                       height: 100,
                       child: PageView.builder(
@@ -388,43 +387,50 @@ class HorarioS extends State<Horario> {
                                     child: Column(
                                       children: [
                                         // Fila superior: Fecha y Horas laboradas
+                                        // Fila superior: Fecha y Horas laboradas
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               registro["fecha"],
-                                              style: const TextStyle(
-                                                color: Color.fromRGBO(
+                                              style: TextStyle(
+                                                color: const Color.fromRGBO(
                                                   237,
                                                   108,
                                                   126,
-                                                  100,
+                                                  1,
                                                 ),
-                                                fontSize: 20,
+                                                fontSize:
+                                                    w *
+                                                    0.045, // Fuente responsiva
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
                                             RichText(
                                               text: TextSpan(
                                                 children: [
-                                                  const TextSpan(
+                                                  TextSpan(
                                                     text: "Horas laboradas: ",
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Colors.white,
-                                                      fontSize: 16,
+                                                      fontSize:
+                                                          w *
+                                                          0.04, // Fuente responsiva
                                                     ),
                                                   ),
                                                   TextSpan(
                                                     text:
                                                         registro["horasLaboradas"],
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.normal,
                                                       color: Colors.white,
-                                                      fontSize: 16,
+                                                      fontSize:
+                                                          w *
+                                                          0.04, // Fuente responsiva
                                                     ),
                                                   ),
                                                 ],

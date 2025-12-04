@@ -150,22 +150,48 @@ class _HistorialState extends State<Historial> {
 
                             final double diff = (index - currentPage).abs();
                             final bool esCentral = diff < 0.5;
+                            final double scale = esCentral ? 1.2 : 0.9;
+                            final double yOffset =
+                                (3 - scale) * 1 + (esCentral ? 25 : 0);
+                            return GestureDetector(
+                              onTap: () {
+                                if (_pageController.hasClients) {
+                                  // Calcula salto circular correcto
+                                  final int currentIndex =
+                                      _pageController.page!.round();
+                                  final int jump = index - currentIndex;
 
-                            return Transform.scale(
-                              scale: esCentral ? 1.15 : 0.85,
-                              child: Center(
-                                child: Text(
-                                  meses[mesIndex],
-                                  style: TextStyle(
-                                    fontSize: esCentral ? w * 0.05 : w * 0.03,
-                                    color:
-                                        esCentral
-                                            ? Colors.black
-                                            : Colors.grey.shade400,
-                                    fontWeight:
-                                        esCentral
-                                            ? FontWeight.bold
-                                            : FontWeight.w400,
+                                  _pageController.animateToPage(
+                                    currentIndex + jump,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
+                                }
+                              },
+                              child: Transform.translate(
+                                offset: Offset(0, yOffset),
+                                child: Transform.scale(
+                                  scale: scale,
+                                  child: Center(
+                                    child: Text(
+                                      meses[mesIndex],
+                                      style: TextStyle(
+                                        fontSize: esCentral ? 26 : 20,
+                                        color:
+                                            esCentral
+                                                ? const Color.fromARGB(
+                                                  255,
+                                                  0,
+                                                  0,
+                                                  0,
+                                                )
+                                                : Colors.grey.shade400,
+                                        fontWeight:
+                                            esCentral
+                                                ? FontWeight.bold
+                                                : FontWeight.w400,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

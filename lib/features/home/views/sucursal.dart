@@ -51,25 +51,25 @@ class SucursalPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 90),
-            // Fila SVG + título
+            const SizedBox(height: 100),
+
+            // Ícono + Título
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 50),
               child: Row(
                 children: [
-                  SizedBox(
-                    child: SvgPicture.asset(
-                      'lib/assets/images/Sucursal.svg',
-                      color: Colors.black,
-                    ),
+                  SvgPicture.asset(
+                    'lib/assets/images/Sucursal.svg',
+                    width: screenWidth * 0.07,
+                    color: Colors.black,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Flexible(
                     child: Text(
                       'Sucursal',
                       style: TextStyle(
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 16,
+                        color: Colors.black,
+                        fontSize: screenWidth * 0.05,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 6.0,
                       ),
@@ -78,25 +78,103 @@ class SucursalPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            // Cuadro azul
-            Container(width: size.width, height: 280, color: Colors.blue),
+
+            const SizedBox(height: 80),
+
+            // Cuadro blanco
+            Container(
+              width: size.width,
+              height: 350,
+              color: const Color.fromARGB(255, 229, 229, 229),
+            ),
+            // *** CUADRO ENCIMA DEL CUADRO AZUL ***
             Transform.translate(
-              offset: const Offset(0, -60), // lo sube para superponerse
+              offset: const Offset(0, -380),
+              child: Container(
+                width: size.width,
+                height: 70,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(50),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromARGB(64, 0, 0, 0), // 25% transparencia
+                      blurRadius: 30, // blur 30
+                      offset: Offset(0, 6),
+                    ),
+                  ],
+                ),
+
+                child: Row(
+                  children: [
+                    // ---- TEXTO A LA IZQUIERDA ----
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "Buscar sucursal...",
+                          hintStyle: const TextStyle(
+                            color: Colors.black54,
+                            fontSize: 16,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 10),
+
+                    // ---- BOTÓN CON ÍCONO DE LUPA ----
+                    Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        shape: BoxShape.circle,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color.fromARGB(64, 0, 0, 0),
+                            blurRadius: 20,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.search, color: Colors.white),
+                        onPressed: () {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Contenedor principal
+            Transform.translate(
+              offset: const Offset(0, -130),
               child: Container(
                 width: size.width,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 24,
+                  vertical: 30,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromARGB(64, 0, 0, 0),
+                      blurRadius: 20,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Número de sucursales
+                    // Cuadro degradado
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(25),
@@ -117,151 +195,189 @@ class SucursalPage extends StatelessWidget {
                         ],
                       ),
                       child: Text(
-                        "${sucursales.length} sucursales",
+                        "${sucursales.length} Sucursales",
                         style: TextStyle(
-                          color: const Color.fromARGB(255, 255, 255, 255),
+                          color: Colors.white,
                           fontSize: screenWidth * 0.05,
-
                           fontWeight: FontWeight.bold,
                           letterSpacing: 6.0,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    // Lista de sucursales
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: sucursales.length,
-                      itemBuilder: (context, index) {
-                        final item = sucursales[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item['titulo'],
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+
+                    const SizedBox(height: 20),
+
+                    // Lista RESPONSIVA
+                    Column(
+                      children:
+                          sucursales.map((item) {
+                            return LayoutBuilder(
+                              builder: (context, constraints) {
+                                bool small = constraints.maxWidth < 360;
+
+                                double imageSize =
+                                    small
+                                        ? screenWidth * 0.25
+                                        : screenWidth * 0.3;
+
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  padding: const EdgeInsets.all(17),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                        ),
-                                        children: [
-                                          const TextSpan(
-                                            text: "Dirección: ",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                    ],
+                                  ),
+
+                                  child:
+                                      small
+                                          ? Column(
+                                            // MODO RESPONSIVO
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              _buildInfo(item, screenWidth),
+                                              const SizedBox(height: 10),
+                                              _buildImage(item, imageSize),
+                                            ],
+                                          )
+                                          : Row(
+                                            // MODO NORMAL
+                                            children: [
+                                              Expanded(
+                                                child: _buildInfo(
+                                                  item,
+                                                  screenWidth,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              _buildImage(item, imageSize),
+                                            ],
                                           ),
-                                          TextSpan(text: item['direccion']),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                        ),
-                                        children: [
-                                          const TextSpan(
-                                            text: "Empleados activos: ",
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: item['empleados'].toString(),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Center(
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            item['ruta'],
-                                          );
-                                        },
-                                        icon: SvgPicture.network(
-                                          'https://upload.wikimedia.org/wikipedia/commons/2/29/Double_arrow_icon.svg', // doble flecha
-                                          height: 20,
-                                          width: 20,
-                                          color: Colors.white,
-                                        ),
-                                        label: const Text(
-                                          "Ver",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.black,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 12,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              50,
-                                            ),
-                                          ),
-                                          shadowColor: Colors.black87,
-                                          elevation: 6,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.network(
-                                  item['imagen'],
-                                  width: 120,
-                                  height: 120,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                                );
+                              },
+                            );
+                          }).toList(),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 40),
           ],
         ),
+      ),
+    );
+  }
+
+  // WIDGET DE INFO
+  Widget _buildInfo(item, double screenWidth) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          item['titulo'],
+          style: TextStyle(
+            fontSize: screenWidth * 0.043,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(color: Colors.black),
+            children: [
+              const TextSpan(
+                text: "Dirección: ",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: item['direccion']),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(color: Colors.black),
+            children: [
+              const TextSpan(
+                text: "Empleados activos: ",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              TextSpan(text: item['empleados'].toString()),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Center(
+          child: ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.12,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              elevation: 6,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Ver",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: screenWidth * 0.035,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: screenWidth * 0.025),
+                SvgPicture.asset(
+                  'lib/assets/images/flecha.svg',
+                  height: screenWidth * 0.028,
+                  width: screenWidth * 0.028,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // WIDGET IMAGEN
+  Widget _buildImage(item, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromARGB(94, 0, 0, 0),
+            blurRadius: 4,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(item['imagen'], fit: BoxFit.cover),
       ),
     );
   }

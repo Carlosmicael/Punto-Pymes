@@ -502,7 +502,7 @@ final List<Map<String, String>> categorias = [
   {
     "nombre": "Vacaciones",
     "asset": "lib/assets/images/Vacaciones.svg",
-    "ruta": AppRoutes.capas,
+    "ruta": AppRoutes.registroExitoso,
   },
   {
     "nombre": "Horario",

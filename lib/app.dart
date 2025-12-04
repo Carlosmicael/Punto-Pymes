@@ -2,6 +2,8 @@ import 'package:auth_company/features/home/views/calendario.dart';
 import 'package:auth_company/features/home/views/capas.dart';
 import 'package:auth_company/features/home/views/horario.dart';
 import 'package:auth_company/features/home/views/register.dart';
+import 'package:auth_company/features/home/views/registroExitoso.dart';
+import 'package:auth_company/features/home/views/registroScan.dart';
 import 'package:auth_company/features/home/views/sucursal.dart';
 import 'package:auth_company/features/home/views/user_perfil.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,10 @@ class HomeApp extends StatelessWidget {
         AppRoutes.splash: (context) => const SplashScreen(),
         AppRoutes.login: (context) => const LoginScreen(),
         AppRoutes.register: (context) => const RegisterScreen(),
-        AppRoutes.home: (context) => const HomeLayout(child: Home()),
+        AppRoutes.home:
+            (context) =>
+                const HomeLayout(child: Home()), // Si HomeLayout permite const
+
         AppRoutes.splashWelcome: (context) => const StartScreen(),
         AppRoutes.profile:
             (context) => const HomeLayout(child: ProfileScreen()),
@@ -38,6 +43,10 @@ class HomeApp extends StatelessWidget {
         AppRoutes.capas: (context) => const HomeLayout(child: Historial()),
         AppRoutes.sucursal:
             (context) => const HomeLayout(child: SucursalPage()),
+        AppRoutes.registroExitoso:
+            (context) => const HomeLayout(child: RegistroExitosoScreen()),
+        AppRoutes.registroScan:
+            (context) => const HomeLayout(child: RegistroScanScreen()),
       },
     );
   }
