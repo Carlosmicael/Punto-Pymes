@@ -60,6 +60,7 @@ class _SolicitudVacacionesState extends State<SolicitudVacaciones> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          key: const PageStorageKey("Solicitud Vacacion"),
           padding: EdgeInsets.symmetric(
             horizontal: width * 0.06,
             vertical: height * 0.02,

@@ -80,6 +80,7 @@ class _RegistroManualState extends State<RegistroManual> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          key: const PageStorageKey("RegistroManual"),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: width * 0.06),
             child: Column(

@@ -90,6 +90,7 @@ class _HistorialState extends State<Historial> {
             child: Container(color: const Color(0xFF303030)),
           ),
           SingleChildScrollView(
+            key: const PageStorageKey("Capas"),
             child: Column(
               children: [
                 // PARTE SUPERIOR (ANTES EXPANDED)

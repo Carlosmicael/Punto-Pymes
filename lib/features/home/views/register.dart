@@ -128,6 +128,7 @@ class RegisterBody extends StatelessWidget {
         return true;
       },
       child: SingleChildScrollView(
+        key: const PageStorageKey("Register"),
         child: Column(
           children: [
             // 🔸 Cabecera con degradado

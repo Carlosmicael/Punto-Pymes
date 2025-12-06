@@ -1,3 +1,7 @@
+import 'package:auth_company/features/home/views/detalleSucursal.dart';
+import 'package:flutter/material.dart';
+
+// 📌 IMPORTS HOME
 import 'package:auth_company/features/home/views/solicitudVacacion.dart';
 import 'package:auth_company/features/home/views/vacaciones.dart';
 import 'package:auth_company/features/home/views/calendario.dart';
@@ -9,15 +13,17 @@ import 'package:auth_company/features/home/views/registroManual.dart';
 import 'package:auth_company/features/home/views/registroScan.dart';
 import 'package:auth_company/features/home/views/sucursal.dart';
 import 'package:auth_company/features/home/views/user_perfil.dart';
+import 'package:auth_company/features/home/views/home.dart';
+import 'package:auth_company/features/home/home_layout.dart';
 
-import 'package:flutter/material.dart';
+// 📌 IMPORTS AUTH
+import 'package:auth_company/features/auth/splash_screen.dart';
+import 'package:auth_company/features/auth/login/login_screen.dart';
+import 'package:auth_company/features/auth/register/register_screen.dart';
+import 'package:auth_company/features/auth/splash_screen_welcome.dart';
+
+// 📌 ROUTES
 import 'routes/app_routes.dart';
-import 'features/auth/splash_screen.dart';
-import 'features/auth/login/login_screen.dart';
-import 'features/auth/register/register_screen.dart';
-import 'features/home/home_layout.dart';
-import 'features/home/views/home.dart';
-import 'features/auth/splash_screen_welcome.dart';
 
 class HomeApp extends StatelessWidget {
   const HomeApp({super.key});
@@ -29,34 +35,38 @@ class HomeApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: AppRoutes.splash,
       routes: {
+        // AUTH
         AppRoutes.splash: (context) => const SplashScreen(),
         AppRoutes.login: (context) => const LoginScreen(),
         AppRoutes.register: (context) => const RegisterScreen(),
-        AppRoutes.home:
-            (context) =>
-                const HomeLayout(child: Home()), // Si HomeLayout permite const
-
         AppRoutes.splashWelcome: (context) => const StartScreen(),
+
+        // HOME
+        AppRoutes.home: (context) => HomeLayout(child: Home()),
+
+        // PANTALLAS CON LAYOUT
         AppRoutes.profile:
-            (context) => const HomeLayout(child: ProfileScreen()),
+            (context) => HomeLayout(child: const ProfileScreen()),
         AppRoutes.registroempleados:
-            (context) => const HomeLayout(child: RegistroEmpleados()),
+            (context) => HomeLayout(child: const RegistroEmpleados()),
         AppRoutes.calendario:
-            (context) => const HomeLayout(child: Calendario()),
-        AppRoutes.horario: (context) => const HomeLayout(child: Horario()),
-        AppRoutes.capas: (context) => const HomeLayout(child: Historial()),
+            (context) => HomeLayout(child: const Calendario()),
+        AppRoutes.horario: (context) => HomeLayout(child: const Horario()),
+        AppRoutes.capas: (context) => HomeLayout(child: const Historial()),
         AppRoutes.sucursal:
-            (context) => const HomeLayout(child: SucursalPage()),
+            (context) => HomeLayout(child: const SucursalPage()),
         AppRoutes.registroExitoso:
-            (context) => const HomeLayout(child: RegistroExitosoScreen()),
+            (context) => HomeLayout(child: const RegistroExitosoScreen()),
         AppRoutes.registroScan:
-            (context) => const HomeLayout(child: RegistroScanScreen()),
+            (context) => HomeLayout(child: const RegistroScanScreen()),
         AppRoutes.registroManual:
-            (context) => const HomeLayout(child: RegistroManual()),
+            (context) => HomeLayout(child: const RegistroManual()),
         AppRoutes.vacaciones:
-            (context) => const HomeLayout(child: VacacionesScreen()),
+            (context) => HomeLayout(child: const VacacionesScreen()),
         AppRoutes.solicitudVacacion:
-            (context) => const HomeLayout(child: SolicitudVacaciones()),
+            (context) => HomeLayout(child: const SolicitudVacaciones()),
+        AppRoutes.detalleSucursal:
+            (context) => HomeLayout(child: PantallaSucursal()),
       },
     );
   }

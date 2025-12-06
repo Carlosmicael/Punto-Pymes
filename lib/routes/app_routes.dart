@@ -15,4 +15,5 @@ class AppRoutes {
   static const registroManual = '/registroManual';
   static const vacaciones = '/vacaciones';
   static const solicitudVacacion = '/solicitudVacacion';
+  static const detalleSucursal = '/detalleSucursal';
 }

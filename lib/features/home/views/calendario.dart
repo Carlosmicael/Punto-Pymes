@@ -98,6 +98,7 @@ class Calendario extends StatelessWidget {
                   // cuadro sin decoración
                   margin: const EdgeInsets.only(top: 40),
                   child: SingleChildScrollView(
+                    key: const PageStorageKey("Calendario"),
                     child: Padding(
                       padding: const EdgeInsets.all(30),
                       child: Column(

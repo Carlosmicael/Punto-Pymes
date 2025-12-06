@@ -1,21 +1,21 @@
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 
 import 'package:flutter_svg/flutter_svg.dart';
 
 class AppDrawer extends StatelessWidget {
-  final ui.Image? screenImage;
-
-  const AppDrawer({super.key, this.screenImage});
+  final Widget? miniChild;
+  final void Function(Widget widget)? onMiniaturaSelected;
+  const AppDrawer({super.key, this.miniChild, this.onMiniaturaSelected});
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     final double drawerWidth = size.width;
-    final double previewWidth = drawerWidth * 0.25;
-    final double previewHeight = drawerWidth * 0.40;
+    final double previewWidth = drawerWidth * 0.20;
+    final double previewHeight = size.height * 0.55;
+
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
 
     final List<Map<String, String>> categorias = [
@@ -282,96 +282,96 @@ class AppDrawer extends StatelessWidget {
                         ),
 
                         const SizedBox(width: 16),
+                        GestureDetector(
+                          onTap: () {
+                            if (onMiniaturaSelected != null &&
+                                miniChild != null) {
+                              onMiniaturaSelected!(miniChild!);
+                            }
+                          },
+                          child: ClipRect(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: SizedBox(
+                                width: previewWidth - 30,
+                                height: previewHeight - 50,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(22),
+                                    bottomLeft: Radius.circular(22),
+                                  ),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      FittedBox(
+                                        fit: BoxFit.cover,
+                                        alignment: Alignment.topLeft,
+                                        child: SizedBox(
+                                          width: size.width,
+                                          height: size.height,
+                                          child:
+                                              miniChild ??
+                                              Container(color: Colors.black12),
+                                        ),
+                                      ),
+                                      Container(
+                                        color: Colors.black.withOpacity(0.4),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
 
-                        // ───────── Row de miniaturas ─────────
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Miniatura 1
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
+                        // ───────── Miniatura REAL renderizada ─────────
+                        GestureDetector(
+                          onTap: () {
+                            if (onMiniaturaSelected != null &&
+                                miniChild != null) {
+                              onMiniaturaSelected!(miniChild!);
+                            }
+                          },
+                          child: ClipRect(
+                            child: Align(
+                              alignment: Alignment.centerLeft,
                               child: SizedBox(
-                                child: ClipRect(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    widthFactor: 0.20,
-                                    child:
-                                        screenImage == null
-                                            ? const Icon(
-                                              Icons.image_not_supported,
-                                              size: 36,
-                                              color: Colors.white,
-                                            )
-                                            : ClipRRect(
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                    topLeft: Radius.circular(
-                                                      30,
-                                                    ),
-                                                    bottomLeft: Radius.circular(
-                                                      30,
-                                                    ),
-                                                  ),
-                                              child: SizedBox(
-                                                width: previewWidth * 2.5,
-                                                height: previewHeight * 3.0,
-                                                child: Stack(
-                                                  fit: StackFit.expand,
-                                                  children: [
-                                                    RawImage(
-                                                      image: screenImage,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                    Container(
-                                                      color: Colors.black
-                                                          .withOpacity(0.4),
-                                                    ),
-                                                  ],
+                                width: previewWidth,
+                                height: previewHeight,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(22),
+                                    bottomLeft: Radius.circular(22),
+                                  ),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      FittedBox(
+                                        fit: BoxFit.cover,
+                                        alignment: Alignment.topLeft,
+                                        child: SizedBox(
+                                          width: size.width,
+                                          height: size.height,
+                                          child:
+                                              miniChild ??
+                                              Container(
+                                                color: const Color.fromARGB(
+                                                  0,
+                                                  0,
+                                                  0,
+                                                  0,
                                                 ),
                                               ),
-                                            ),
+                                        ),
+                                      ),
+                                      Container(color: Colors.transparent),
+                                    ],
                                   ),
                                 ),
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () => Navigator.pop(context),
-                              child: SizedBox(
-                                child: ClipRect(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    widthFactor: 0.25,
-                                    child:
-                                        screenImage == null
-                                            ? const Icon(
-                                              Icons.image_not_supported,
-                                              size: 36,
-                                              color: Colors.white,
-                                            )
-                                            : ClipRRect(
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                    topLeft: Radius.circular(
-                                                      30,
-                                                    ),
-                                                    bottomLeft: Radius.circular(
-                                                      30,
-                                                    ),
-                                                  ),
-                                              child: SizedBox(
-                                                width: previewWidth * 3.0,
-                                                height: previewHeight * 3.5,
-                                                child: RawImage(
-                                                  image: screenImage,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

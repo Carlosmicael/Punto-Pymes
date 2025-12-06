@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'dart:ui' as ui;
 
 import 'drawer.dart';
 import 'footer.dart';
@@ -17,43 +15,13 @@ class HomeLayout extends StatefulWidget {
 }
 
 class _HomeLayoutState extends State<HomeLayout> {
-  final GlobalKey previewKey = GlobalKey(); // ← YA NO ES STATIC
-  ui.Image? screenImage;
-
-  Future<void> captureScreen() async {
-    try {
-      final boundary = previewKey.currentContext?.findRenderObject();
-
-      if (boundary is! RenderRepaintBoundary) {
-        print("Render aún no listo");
-        return;
-      }
-
-      if (boundary.debugNeedsPaint) {
-        Future.delayed(const Duration(milliseconds: 100), captureScreen);
-        return;
-      }
-
-      final image = await boundary.toImage(pixelRatio: 0.5);
-
-      if (mounted) {
-        setState(() {
-          screenImage = image;
-        });
-      }
-    } catch (e) {
-      print("Error capturando pantalla: $e");
-    }
-  }
+  // 👉 VARIABLE QUE SE ACTUALIZA
+  late Widget currentChild;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (mounted) captureScreen();
-    });
+    currentChild = widget.child; // Inicia con el contenido enviado
   }
 
   @override
@@ -61,17 +29,30 @@ class _HomeLayoutState extends State<HomeLayout> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: CustomHomeAppBar(),
-      drawer: AppDrawer(screenImage: screenImage),
+
+      // Drawer ahora envía miniatura → actualiza el layout
+      drawer: AppDrawer(
+        miniChild: currentChild,
+
+        // 🔥 Cuando el usuario toca la miniatura:
+        onMiniaturaSelected: (widgetSeleccionado) {
+          setState(() {
+            currentChild = widgetSeleccionado;
+          });
+
+          Navigator.pop(context); // cerrar drawer
+        },
+      ),
+
       body: Stack(
         children: [
-          RepaintBoundary(
-            key: previewKey,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 0), // ← Evita overflow
-              child: widget.child,
-            ),
+          // 👉 Renderizamos el widget dinámico
+          Padding(
+            padding: const EdgeInsets.only(bottom: 0),
+            child: currentChild,
           ),
 
+          // Footer animado
           Positioned(
             left: 0,
             right: 0,

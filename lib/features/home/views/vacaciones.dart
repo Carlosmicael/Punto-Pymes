@@ -45,6 +45,7 @@ class VacacionesScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(),
 
             child: SingleChildScrollView(
+              key: const PageStorageKey("Vacaciones"),
               physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -206,6 +206,7 @@ class HomeBody extends StatelessWidget {
     final double boxHeight = (screenHeight * 0.09).clamp(65.0, 80.0);
 
     return SingleChildScrollView(
+      key: const PageStorageKey("Home"),
       child: Column(
         children: [
           SizedBox(height: screenHeight * 0.38),

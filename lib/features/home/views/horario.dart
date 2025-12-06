@@ -111,6 +111,7 @@ class HorarioS extends State<Horario> {
           // Contenido principal
           SafeArea(
             child: SingleChildScrollView(
+              key: const PageStorageKey("Horario"),
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: sidePadding,

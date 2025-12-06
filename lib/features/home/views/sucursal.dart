@@ -49,6 +49,7 @@ class SucursalPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
+        key: const PageStorageKey("Sucursal"),
         child: Column(
           children: [
             const SizedBox(height: 100),
@@ -331,7 +332,7 @@ class SucursalPage extends StatelessWidget {
         Center(
           child: ElevatedButton(
             onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.registroScan);
+              Navigator.pushNamed(context, AppRoutes.detalleSucursal);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
