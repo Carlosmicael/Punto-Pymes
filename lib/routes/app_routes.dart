@@ -8,5 +8,7 @@ class AppRoutes {
   static const capas = '/capas';
 
 //  static const userPerfil = '/userPerfil';
-  static const registro = '/registro';
+  static const registroExitoso = '/registroExitoso';
+  static const registroScan = '/registroScan';
+  static const registroList = '/registroList';
 }

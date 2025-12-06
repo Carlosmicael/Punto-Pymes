@@ -1,4 +1,5 @@
 import 'package:auth_company/features/user/services/user_service.dart';
+import 'package:auth_company/features/auth/login/login_service.dart';
 import 'package:flutter/material.dart';
 
 // Definición de colores
@@ -18,6 +19,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   // Controladores para los campos
+  final LoginService _loginService = LoginService();
   final UserService _userService = UserService();
   final TextEditingController _nombresCtrl = TextEditingController();
   final TextEditingController _apellidosCtrl = TextEditingController();
@@ -41,12 +43,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadProfileData() async {
     setState(() => _isLoading = true);
 
-    final data = await _userService.getProfile(widget.uid);
+    // Paso 1: Obtener el token guardado
+    final authToken = await _loginService.getSavedToken();
+
+    if (authToken == null) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        // Manejo de error si no hay token (ej. redirigir a Login)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error: No se encontró token de sesión.')),
+        );
+      }
+      return;
+    }
+
+    // Paso 2: Llamar al servicio y pasar el token
+    final data = await _userService.getProfile(widget.uid, authToken);
 
     if (data != null && mounted) {
       // Asignar los valores a los controladores
-      _nombresCtrl.text = data['nombres'] ?? '';
-      _apellidosCtrl.text = data['apellidos'] ?? '';
+      _nombresCtrl.text = data['nombre'] ?? '';
+      _apellidosCtrl.text = data['apellido'] ?? '';
       _telefonoCtrl.text = data['telefono'] ?? '';
       _cedulaCtrl.text = data['cedula'] ?? 'N/A';
       _correoCtrl.text = data['correo'] ?? 'N/A';
@@ -65,16 +82,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // Método para guardar la edición
   Future<void> _saveProfileChanges() async {
+
+    // Paso 1: Obtener el token JWT guardado.
+    final authToken = await _loginService.getSavedToken();
+    
+    if (authToken == null) {
+        if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Error: No se encontró token para guardar cambios.')),
+            );
+        }
+        return;
+    }
+
     // Recolectar solo los datos que se pueden editar
     final userData = {
-      "nombres": _nombresCtrl.text,
-      "apellidos": _apellidosCtrl.text,
+      "nombre": _nombresCtrl.text,
+      "apellido": _apellidosCtrl.text,
       "telefono": _telefonoCtrl.text,
       "genero": _selectedGender,
     };
 
     // Intentar actualizar
-    final success = await _userService.updateProfile(widget.uid, userData);
+    // Paso 2: Pasar el token al servicio
+    final success = await _userService.updateProfile(widget.uid, userData, authToken);
 
     if (mounted) {
       if (success) {

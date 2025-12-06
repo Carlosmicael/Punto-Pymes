@@ -1,97 +1,392 @@
 import 'package:auth_company/features/auth/login/login_service.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui; // Necesario para ui.Image
+import 'package:flutter_svg/flutter_svg.dart'; // Necesario para SvgPicture
 
 class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+  // Propiedad para recibir la imagen de la pantalla capturada
+  final ui.Image? screenImage;
+
+  // El constructor ahora acepta la imagen
+  const AppDrawer({super.key, this.screenImage});
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    // Variables de diseño del archivo copia
+    final double drawerWidth = size.width;
+    final double previewWidth = drawerWidth * 0.25; 
+    final double previewHeight = drawerWidth * 0.40; 
+    final String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
+
+    // Lista de categorías del archivo copia (ejemplo, se asume que las rutas y assets son correctos)
+    final List<Map<String, String>> categorias = [
+      {
+        "nombre": "Home",
+        "asset": "lib/assets/images/Home.svg",
+        "ruta": AppRoutes.home,
+      },
+      {
+        "nombre": "Sucursal",
+        "asset": "lib/assets/images/Sucursal.svg",
+        "ruta": AppRoutes.registroExitoso, // Asumo esta ruta de ejemplo
+      },
+      {
+        "nombre": "Lista de Asistencias",
+        "asset": "lib/assets/images/Calendar.svg",
+        "ruta": AppRoutes.registroList, // Asumo esta ruta de ejemplo
+      },
+      {
+        "nombre": "Vacaciones",
+        "asset": "lib/assets/images/Vacaciones.svg",
+        "ruta": AppRoutes.capas, // Asumo esta ruta de ejemplo
+      },
+      {
+        "nombre": "Registro Scan",
+        "asset": "lib/assets/images/Horario.svg",
+        "ruta": AppRoutes.registroScan, // Asumo esta ruta de ejemplo
+      },
+      {
+        "nombre": "Zona",
+        "asset": "lib/assets/images/Zona.svg",
+        "ruta": AppRoutes.capas, // Asumo esta ruta de ejemplo
+      },
+      {
+        "nombre": "Registro Sensor",
+        "asset": "lib/assets/images/Registro.svg",
+        "ruta": AppRoutes.registroExitoso, // Asumo esta ruta de ejemplo
+      },
+    ];
+
     return Drawer(
+      width: drawerWidth, // Drawer de ancho completo
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+          topRight: Radius.circular(0),
+          bottomRight: Radius.circular(0),
         ),
       ),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Color.fromARGB(255, 100, 14, 8)),
-            child: Center(
-              child: Text(
-                'Menú principal',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+      child: Container(
+        // Fondo con gradiente del archivo copia
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.topRight,
+            colors: [
+              Color(0xFF3C0A13),
+              Color(0xFFA21C34),
+              Color(0xFFE41335),
+              Color(0xFFE81236),
+              Color(0xFFEB455E),
+            ],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // ───────── SVG de fondo (Huella) ─────────
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Opacity(
+                opacity: 0.5,
+                child: SvgPicture.asset(
+                  'lib/assets/images/huella3.svg', // Asume que este asset existe
+                  width: size.width * 0.3,
+                  height: size.width * 0.3,
                 ),
               ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home_outlined),
-            title: const Text('Inicio'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.store),
-            title: const Text('Sucursales'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('Registro Assistencia'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, AppRoutes.registro); 
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.list),
-            title: const Text('Historial de registros'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person_outline),
-            title: const Text('Perfil'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.settings_outlined),
-            title: const Text('Configuración'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.redAccent),
-            title: const Text(
-              'Cerrar sesión',
-              style: TextStyle(color: Colors.redAccent),
+
+            Column(
+              children: [
+                // ─────────────── Header: Imagen circular + nombre + botón cerrar ───────────────
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 30,
+                    horizontal: 25,
+                  ),
+                  color: const Color.fromARGB(0, 0, 0, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Imagen circular + texto
+                      Row(
+                        children: [
+                          Container(
+                            width: size.width * 0.10,
+                            height: size.width * 0.10,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              image: const DecorationImage(
+                                image: NetworkImage(
+                                  'https://ichef.bbci.co.uk/ace/ws/640/cpsprodpb/9db5/live/48fd9010-c1c1-11ee-9519-97453607d43e.jpg.webp',
+                                ), // Imagen de perfil de ejemplo
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            "Carlos Lopez", // Nombre de usuario de ejemplo
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: size.width * 0.035,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Botón cerrar
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        iconSize: size.width * 0.055,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ─────────────── Sección principal: Menú + Miniaturas ───────────────
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 0),
+                    child: Row(
+                      children: [
+                        // ───────── Columna de Menú (SVG + Texto) ─────────
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20, right: 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Lista de categorías
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children:
+                                        categorias.map((item) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 15,
+                                            ),
+                                            child: InkWell(
+                                              onTap: () {
+                                                Navigator.pop(context); // Cierra el drawer
+                                                // Navega a la ruta
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  item['ruta']!,
+                                                );
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  // Punto indicador de ruta actual
+                                                  if (item['ruta'] ==
+                                                      currentRoute)
+                                                    Container(
+                                                      width: 8,
+                                                      height: 8,
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                            right: 8,
+                                                          ),
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                    )
+                                                  else
+                                                    const SizedBox(
+                                                      width: 8,
+                                                    ),
+
+                                                  const SizedBox(width: 15),
+                                                  // SVG del menú
+                                                  SvgPicture.asset(
+                                                    item['asset']!,
+                                                    width:
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width *
+                                                        0.05,
+                                                    height:
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width *
+                                                        0.05,
+                                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn), // Usar colorFilter en lugar de 'color' (obsoleto)
+                                                  ),
+                                                  const SizedBox(width: 15),
+
+                                                  // Texto del menú
+                                                  Flexible(
+                                                    child: Text(
+                                                      item['nombre']!,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.035,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                  ),
+                                ),
+
+                                // ───────── Opción de Cerrar Sesión (con lógica funcional) ─────────
+                                InkWell(
+                                  onTap: () async {
+                                    Navigator.pop(context); // Cierra el Drawer
+
+                                    // Lógica del archivo original (drawer.dart)
+                                    await LoginService().clearToken();
+                                    print("Token eliminado correctamente");
+
+                                    // Navegar al login
+                                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                                  },
+                                  child: Row(
+                                    children: [
+                                      SvgPicture.asset(
+                                        'lib/assets/images/Logout.svg', // Asume que este asset existe
+                                        width: size.width * 0.05,
+                                        height: size.width * 0.05,
+                                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Flexible(
+                                        child: Text(
+                                          "Logout",
+                                          style: TextStyle(
+                                            fontSize: size.width * 0.035,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 16),
+
+                        // ───────── Columna de Miniaturas (Preview de pantalla) ─────────
+                        // Las miniaturas solo están presentes si screenImage no es nulo
+                        if (screenImage != null)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Miniatura 1
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: SizedBox(
+                                  child: ClipRect(
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      widthFactor: 0.20,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.only(
+                                              topLeft: Radius.circular(30),
+                                              bottomLeft: Radius.circular(30),
+                                            ),
+                                        child: SizedBox(
+                                          width: previewWidth * 2.5,
+                                          height: previewHeight * 3.0,
+                                          child: Stack(
+                                            fit: StackFit.expand,
+                                            children: [
+                                              RawImage(
+                                                image: screenImage,
+                                                fit: BoxFit.cover,
+                                              ),
+                                              Container( // Overlay oscuro
+                                                color: Colors.black
+                                                    .withOpacity(0.4),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Miniatura 2
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: SizedBox(
+                                  child: ClipRect(
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      widthFactor: 0.25,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.only(
+                                              topLeft: Radius.circular(30),
+                                              bottomLeft: Radius.circular(30),
+                                            ),
+                                        child: SizedBox(
+                                          width: previewWidth * 3.0,
+                                          height: previewHeight * 3.5,
+                                          child: RawImage(
+                                            image: screenImage,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          // Mostrar un widget alternativo si la imagen no está disponible
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 20),
+                              child: Icon(
+                                Icons.info_outline,
+                                size: 50,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+              ],
             ),
-            onTap: () async {
-              Navigator.pop(context); // Cierra el Drawer
-
-              // 1. Eliminar token guardado
-              await LoginService().clearToken();
-              print("Token eliminado correctamente");
-
-              // 2. Navegar al login
-              Navigator.pushReplacementNamed(context, AppRoutes.login);
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,17 +1,22 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:auth_company/features/auth/login/login_service.dart';
+import 'package:auth_company/config.dart';
 
 /// Servicio encargado de manejar la lógica de perfil (Lectura y Actualización).
 class UserService {
   // Usa la misma IP de RegisterService
-  final String baseUrl = "http://192.168.1.7:3000"; 
+  final String baseUrl = baseUrll;
 
   // --- 1. Método para obtener datos del perfil (GET) ---
   /// Llama al endpoint GET /users/:uid
-  Future<Map<String, dynamic>?> getProfile(String uid) async {
+  Future<Map<String, dynamic>?> getProfile(String uid, String token) async {
     try {
       final url = Uri.parse("$baseUrl/users/$uid");
-      final response = await http.get(url);
+      final response = await http.get(url, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token", 
+      });
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -28,13 +33,16 @@ class UserService {
 
   // --- 2. Método para actualizar datos del perfil (PATCH) ---
   /// Llama al endpoint PATCH /users/:uid
-  Future<bool> updateProfile(String uid, Map<String, dynamic> userData) async {
+  Future<bool> updateProfile(String uid, Map<String, dynamic> userData, String token) async {
     try {
       final url = Uri.parse("$baseUrl/users/$uid");
 
       final response = await http.patch(
         url,
-        headers: {"Content-Type": "application/json"},
+        headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token", 
+      },
         body: jsonEncode(userData),
       );
 

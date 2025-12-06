@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:auth_company/config.dart';
 
 /// Servicio encargado de manejar la lógica de login.
 /// Se comunica con el backend NestJS en el endpoint /auth/login.
 class LoginService {
-  final String baseUrl = "http://192.168.1.7:3000";
+  final String baseUrl = baseUrll; 
 
   /// Envía usuario y contraseña al backend y devuelve el token JWT si es válido.
   Future<String?> login(String usuario, String contrasena) async {

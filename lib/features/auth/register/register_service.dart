@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:auth_company/config.dart';
 
 /// Servicio encargado de manejar la lógica de registro.
 /// Se comunica con el backend NestJS en el endpoint /auth/register.
 class RegisterService {
-  final String baseUrl = "http://192.168.1.7:3000";
+  final String baseUrl = baseUrll;
 
   /// Envía los datos de registro al backend y devuelve el UID si es exitoso.
   Future<Map<String, dynamic>?> register(Map<String, dynamic> userData) async {

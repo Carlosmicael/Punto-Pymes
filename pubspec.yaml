@@ -42,6 +42,11 @@ dependencies:
   google_maps_flutter: ^2.6.1 
   geocoding: ^3.0.0 
   image_picker: ^1.1.2
+  carousel_slider_plus: ^7.1.1
+  permission_handler: ^11.0.0
+  camera: ^0.10.5+5
+
+  flutter_svg: ^2.1.1
 
 
 dev_dependencies:
@@ -66,17 +71,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - lib/assets/animaciones/Check Mark - Success.json
-    - lib/assets/animaciones/fingerprint.json
-    - lib/assets/animaciones/Welcome.json
-    - lib/assets/videos/authCompany.mp4
-    - lib/assets/images/logoPuntoPymes.png
-    - lib/assets/images/Google__G__logo.svg.webp
-    - lib/assets/images/fondo.png
-    - lib/assets/images/baPuntopymes.png
-    - lib/assets/images/logoTalenTrack.png
-    - lib/assets/icons/iconHome.png
-    - lib/assets/icons/iconCapas.png
-    - lib/assets/icons/iconCapture.png
-    - lib/assets/icons/iconUser.png
-    - lib/assets/icons/perfil.png
+    - lib/assets/images/
+    - lib/assets/animaciones/
+    - lib/assets/videos/
+    - lib/assets/icons/

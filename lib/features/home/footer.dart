@@ -165,8 +165,8 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
 
     //tamaño de los iconos y calculos de responsividad//
     final double iconSize = height * 0.028; 
-    final double containerHeight = height * 0.075;
-    final double navBarWidth = width * 0.60;     
+    final double containerHeight = height * 0.065;
+    final double navBarWidth = width * 0.62;     //AQUI
     final double pointerHeight = containerHeight * 0.6; 
     final double pointerWidth = navBarWidth * 0.38;   
     final double iconAreaWidth = navBarWidth / _navItems.length;
