@@ -87,6 +87,7 @@ class SucursalPage extends StatelessWidget {
               height: 350,
               color: const Color.fromARGB(255, 229, 229, 229),
             ),
+
             // *** CUADRO ENCIMA DEL CUADRO AZUL ***
             Transform.translate(
               offset: const Offset(0, -380),
@@ -100,8 +101,8 @@ class SucursalPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(50),
                   boxShadow: const [
                     BoxShadow(
-                      color: Color.fromARGB(64, 0, 0, 0), // 25% transparencia
-                      blurRadius: 30, // blur 30
+                      color: Color.fromARGB(64, 0, 0, 0),
+                      blurRadius: 30,
                       offset: Offset(0, 6),
                     ),
                   ],
@@ -238,20 +239,23 @@ class SucursalPage extends StatelessWidget {
                                   child:
                                       small
                                           ? Column(
-                                            // MODO RESPONSIVO
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
                                             children: [
-                                              _buildInfo(item, screenWidth),
+                                              _buildInfo(
+                                                context,
+                                                item,
+                                                screenWidth,
+                                              ),
                                               const SizedBox(height: 10),
                                               _buildImage(item, imageSize),
                                             ],
                                           )
                                           : Row(
-                                            // MODO NORMAL
                                             children: [
                                               Expanded(
                                                 child: _buildInfo(
+                                                  context,
                                                   item,
                                                   screenWidth,
                                                 ),
@@ -275,8 +279,12 @@ class SucursalPage extends StatelessWidget {
     );
   }
 
-  // WIDGET DE INFO
-  Widget _buildInfo(item, double screenWidth) {
+  // WIDGET DE INFO (CORREGIDO)
+  Widget _buildInfo(
+    BuildContext context,
+    Map<String, dynamic> item,
+    double screenWidth,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -322,7 +330,9 @@ class SucursalPage extends StatelessWidget {
 
         Center(
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.registroScan);
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               padding: EdgeInsets.symmetric(
@@ -361,7 +371,7 @@ class SucursalPage extends StatelessWidget {
   }
 
   // WIDGET IMAGEN
-  Widget _buildImage(item, double size) {
+  Widget _buildImage(Map<String, dynamic> item, double size) {
     return Container(
       width: size,
       height: size,

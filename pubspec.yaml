@@ -45,6 +45,10 @@ dependencies:
   carousel_slider_plus: ^7.1.1
   permission_handler: ^11.0.0
   camera: ^0.10.5+5
+  file_picker: ^8.0.0
+  fan_carousel_image_slider: ^1.3.0
+
+
 
 dev_dependencies:
   flutter_test:

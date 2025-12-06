@@ -137,6 +137,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  easy_image_viewer:
+    dependency: transitive
+    description:
+      name: easy_image_viewer
+      sha256: fb6cb123c3605552cc91150dcdb50ca977001dcddfb71d20caa0c5edc9a80947
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.1"
   fake_async:
     dependency: transitive
     description:
@@ -145,6 +153,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.3"
+  fan_carousel_image_slider:
+    dependency: "direct main"
+    description:
+      name: fan_carousel_image_slider
+      sha256: "8183f000fa263e563b125c84a237290f8c11b8224face2e3f0e859b82ebc1cb8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
   ffi:
     dependency: transitive
     description:
@@ -161,6 +177,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      sha256: ab13ae8ef5580a411c458d6207b6774a6c237d77ac37011b13994879f68a8810
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.3.7"
   file_selector_linux:
     dependency: transitive
     description:
@@ -230,6 +254,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
+  flutter_svg_provider:
+    dependency: transitive
+    description:
+      name: flutter_svg_provider
+      sha256: cda47ab350671ba51ae4605d48f4c82fa5a2c399d22ebda367c1b407234c5048
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -901,6 +933,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.23.0"
+  win32:
+    dependency: transitive
+    description:
+      name: win32
+      sha256: d7cb55e04cd34096cd3a79b3330245f54cb96a370a1c27adb3c84b917de8b08e
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.15.0"
   xdg_directories:
     dependency: transitive
     description:

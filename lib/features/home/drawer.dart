@@ -14,8 +14,8 @@ class AppDrawer extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     final double drawerWidth = size.width;
-    final double previewWidth = drawerWidth * 0.25; 
-    final double previewHeight = drawerWidth * 0.40; 
+    final double previewWidth = drawerWidth * 0.25;
+    final double previewHeight = drawerWidth * 0.40;
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
 
     final List<Map<String, String>> categorias = [
@@ -37,7 +37,7 @@ class AppDrawer extends StatelessWidget {
       {
         "nombre": "Vacaciones",
         "asset": "lib/assets/images/Vacaciones.svg",
-        "ruta": AppRoutes.capas,
+        "ruta": AppRoutes.vacaciones,
       },
       {
         "nombre": "Horario",

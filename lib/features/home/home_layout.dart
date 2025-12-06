@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 
 import 'drawer.dart';
 import 'footer.dart';
-import 'app_bar.dart';
+import 'views/app_bar.dart';
 
 class HomeLayout extends StatefulWidget {
   final Widget child;

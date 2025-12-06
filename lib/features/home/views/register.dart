@@ -495,7 +495,7 @@ class _CurvedBottomClipper extends CustomClipper<Path> {
 }
 
 class RegistroModal extends StatelessWidget {
-  final String texto; // Texto dentro del cuadro
+  final String texto;
   const RegistroModal({super.key, required this.texto});
 
   @override
@@ -504,220 +504,270 @@ class RegistroModal extends StatelessWidget {
     final width = size.width;
     final height = size.height;
 
-    return Center(
-      child: Material(
-        color: Colors.transparent, // Fondo transparente
-        child: Container(
-          width: width * 0.90,
-          padding: EdgeInsets.all(width * 0.05),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(50)),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(50),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(42, 23, 23, 23),
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                padding: EdgeInsets.all(width * 0.05),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Cuadro interno superior con texto y botón cerrar
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: height * 0.02,
-                        horizontal: width * 0.07,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(220, 0, 0, 0),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Row(
+    return Stack(
+      children: [
+        // 🔹 FONDO TRANSPARENTE + BLUR QUE CUBRE TODA LA PANTALLA
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+            child: Container(
+              color: Colors.black.withOpacity(0.12), // Oscurecido 12%
+            ),
+          ),
+        ),
+
+        // 🔹 CONTENIDO DEL MODAL CENTRADO
+        Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: width * 0.90,
+              padding: EdgeInsets.all(width * 0.05),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      colors: [Color(0xFFE81236), Color(0xFF7B1522)],
+                    ),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  padding: EdgeInsets.all(width * 0.08),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // TÍTULO registro
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
                             child: Text(
                               texto,
                               style: TextStyle(
-                                color: const Color.fromARGB(255, 255, 255, 255),
-                                fontSize: width * 0.045,
+                                color: Colors.white,
+                                fontSize: width * 0.05,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          // Botón circular para cerrar
-                          Container(
-                            width: width * 0.1,
-                            height: width * 0.1,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white24,
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size:
-                                    width *
-                                    0.06, // tamaño del ícono proporcional al ancho
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
+
+                          // Icono de cerrar
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: width * 0.065,
                             ),
                           ),
                         ],
                       ),
-                    ),
 
-                    SizedBox(height: height * 0.02),
-
-                    // Hora de entrada
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Hora de entrada:",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: width * 0.04,
-                          ),
+                      // Línea debajo del título
+                      Container(
+                        width: double.infinity,
+                        height: 2,
+                        margin: EdgeInsets.only(
+                          top: height * 0.008,
+                          bottom: height * 0.02,
                         ),
-                        Text(
-                          "12:00 AM",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: width * 0.045,
+                        color: Colors.white.withOpacity(0.4),
+                      ),
+
+                      SizedBox(height: height * 0.02),
+
+                      // 🔹 Hora de entrada
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Hora de entrada:",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: width * 0.04,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: height * 0.015),
-
-                    // Hora de salida
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Hora de salida:",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: width * 0.04,
+                          Text(
+                            "12:00 AM",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: width * 0.045,
+                            ),
                           ),
-                        ),
-                        Text(
-                          "12:00 PM",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: width * 0.045,
+                        ],
+                      ),
+
+                      SizedBox(height: height * 0.015),
+
+                      // 🔹 Hora de salida
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Hora de salida:",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: width * 0.04,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                          Text(
+                            "12:00 PM",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: width * 0.045,
+                            ),
+                          ),
+                        ],
+                      ),
 
-                    SizedBox(height: height * 0.03),
-
-                    // Botón 1
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, AppRoutes.registroScan);
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                      SizedBox(height: height * 0.03),
+                      // ---------------- BOTÓN 1 ----------------
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, AppRoutes.registroScan);
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
                           child: Container(
                             width: double.infinity,
                             padding: EdgeInsets.symmetric(
-                              vertical: height * 0.018,
+                              vertical: height * 0.01,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color.fromARGB(205, 255, 255, 255),
+                              color: Colors.black,
                               borderRadius: BorderRadius.circular(50),
                               boxShadow: const [
                                 BoxShadow(
-                                  color: Color.fromARGB(
-                                    73,
-                                    0,
-                                    0,
-                                    0,
-                                  ), // sombra oscura
-                                  blurRadius: 10, // difuminado
-                                  offset: Offset(
-                                    0,
-                                    5,
-                                  ), // desplazamiento vertical
+                                  color: Colors.black54,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 5),
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: Text(
-                                "Entrada",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: width * 0.035,
+
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // 🔸 Texto centrado
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      "Entrada",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: width * 0.035,
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
+
+                                // 🔸 Círculo a la derecha sin recorte
+                                Container(
+                                  margin: const EdgeInsets.only(right: 18),
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFF3C3939,
+                                    ).withOpacity(0.71),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: SvgPicture.asset(
+                                        "assets/icons/check.svg",
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                    ),
 
-                    SizedBox(height: height * 0.015),
+                      SizedBox(height: height * 0.015),
 
-                    // Botón 2
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                      // ---------------- BOTÓN 2 ----------------
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(50),
                         child: Container(
                           width: double.infinity,
                           padding: EdgeInsets.symmetric(
-                            vertical: height * 0.018,
+                            vertical: height * 0.01,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(205, 255, 255, 255),
+                            color: Colors.black,
                             borderRadius: BorderRadius.circular(50),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
-                                color: const Color.fromARGB(
-                                  73,
-                                  0,
-                                  0,
-                                  0,
-                                ), // sombra oscura
-                                blurRadius: 10, // difuminado
-                                offset: const Offset(
-                                  0,
-                                  5,
-                                ), // desplazamiento vertical
+                                color: Colors.black54,
+                                blurRadius: 10,
+                                offset: Offset(0, 5),
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: Text(
-                              "Salida",
-                              style: TextStyle(
-                                color: const Color.fromARGB(255, 0, 0, 0),
-                                fontSize: width * 0.035,
+
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // 🔸 Texto centrado
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    "Salida",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: width * 0.035,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+
+                              // 🔸 Círculo derecha
+                              Container(
+                                margin: const EdgeInsets.only(right: 18),
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF3C3939,
+                                  ).withOpacity(0.71),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: SvgPicture.asset(
+                                      "assets/icons/arrow.svg",
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

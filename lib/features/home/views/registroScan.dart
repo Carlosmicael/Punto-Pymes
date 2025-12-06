@@ -1,3 +1,4 @@
+import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 
@@ -99,38 +100,43 @@ class _RegistroScanScreenState extends State<RegistroScanScreen> {
                   top: h * 0.62, // movido proporcional debajo del cuadro
                   left: w * 0.14,
                   right: w * 0.14,
-                  child: Container(
-                    height: 55,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF370B12), Color(0xFFE41335)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.45),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.registroManual);
+                    },
+                    child: Container(
+                      height: 55,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF370B12), Color(0xFFE41335)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            "Registro Manual",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.45),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.edit, color: Colors.white),
                         ],
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              "Registro Manual",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.edit, color: Colors.white),
+                          ],
+                        ),
                       ),
                     ),
                   ),

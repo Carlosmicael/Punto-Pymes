@@ -12,4 +12,7 @@ class AppRoutes {
   static const sucursal = '/sucursal';
   static const registroExitoso = '/registroExitoso';
   static const registroScan = '/registroScan';
+  static const registroManual = '/registroManual';
+  static const vacaciones = '/vacaciones';
+  static const solicitudVacacion = '/solicitudVacacion';
 }

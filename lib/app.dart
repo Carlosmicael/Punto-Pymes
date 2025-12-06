@@ -1,11 +1,15 @@
+import 'package:auth_company/features/home/views/solicitudVacacion.dart';
+import 'package:auth_company/features/home/views/vacaciones.dart';
 import 'package:auth_company/features/home/views/calendario.dart';
 import 'package:auth_company/features/home/views/capas.dart';
 import 'package:auth_company/features/home/views/horario.dart';
 import 'package:auth_company/features/home/views/register.dart';
 import 'package:auth_company/features/home/views/registroExitoso.dart';
+import 'package:auth_company/features/home/views/registroManual.dart';
 import 'package:auth_company/features/home/views/registroScan.dart';
 import 'package:auth_company/features/home/views/sucursal.dart';
 import 'package:auth_company/features/home/views/user_perfil.dart';
+
 import 'package:flutter/material.dart';
 import 'routes/app_routes.dart';
 import 'features/auth/splash_screen.dart';
@@ -47,6 +51,12 @@ class HomeApp extends StatelessWidget {
             (context) => const HomeLayout(child: RegistroExitosoScreen()),
         AppRoutes.registroScan:
             (context) => const HomeLayout(child: RegistroScanScreen()),
+        AppRoutes.registroManual:
+            (context) => const HomeLayout(child: RegistroManual()),
+        AppRoutes.vacaciones:
+            (context) => const HomeLayout(child: VacacionesScreen()),
+        AppRoutes.solicitudVacacion:
+            (context) => const HomeLayout(child: SolicitudVacaciones()),
       },
     );
   }

@@ -31,6 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   //campos de formularios para el registro//
   final TextEditingController _nombresController = TextEditingController();
   final TextEditingController _apellidosController = TextEditingController();
+
   final TextEditingController _cedulaController = TextEditingController();
   final TextEditingController _correoController = TextEditingController();
   final TextEditingController _telefonoController = TextEditingController();
@@ -357,8 +358,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: PageView(
                       controller: _pageController,
                       physics: const NeverScrollableScrollPhysics(),
-                      onPageChanged: (index) =>
-                          setState(() => _currentPage = index),
+                      onPageChanged:
+                          (index) => setState(() => _currentPage = index),
                       children: [
                         _buildFirstPage(width, height),
                         _buildSecondPage(width, height),
@@ -801,9 +802,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.black.withOpacity(0.4)
-              : Colors.transparent,
+          color:
+              isSelected ? Colors.black.withOpacity(0.4) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(icon, color: Colors.white, size: width * 0.08),
@@ -919,8 +919,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _obscurePassword ? Icons.visibility_off : Icons.visibility,
                   color: const Color.fromARGB(255, 255, 255, 255),
                 ),
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
+                onPressed:
+                    () => setState(() => _obscurePassword = !_obscurePassword),
               ),
             ),
 
@@ -961,8 +961,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _obscurePassword2 ? Icons.visibility_off : Icons.visibility,
                   color: const Color.fromARGB(255, 255, 255, 255),
                 ),
-                onPressed: () =>
-                    setState(() => _obscurePassword2 = !_obscurePassword2),
+                onPressed:
+                    () =>
+                        setState(() => _obscurePassword2 = !_obscurePassword2),
               ),
             ),
 
@@ -1227,8 +1228,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           scrollGesturesEnabled: true,
           mapType: MapType.normal,
           initialCameraPosition: CameraPosition(target: _mapCenter, zoom: 14),
-          onMapCreated: (GoogleMapController controller) =>
-              _mapController = controller,
+          onMapCreated:
+              (GoogleMapController controller) => _mapController = controller,
           markers: _markers,
           myLocationEnabled: true,
           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
@@ -1267,20 +1268,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: const Color.fromARGB(255, 255, 255, 255),
                   width: 3,
                 ),
-                image: _imageFile != null
-                    ? DecorationImage(
-                        image: FileImage(_imageFile!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+                image:
+                    _imageFile != null
+                        ? DecorationImage(
+                          image: FileImage(_imageFile!),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
               ),
-              child: _imageFile == null
-                  ? Icon(
-                      Icons.person_add_alt_1_rounded,
-                      color: const Color.fromARGB(255, 175, 170, 170),
-                      size: circleSize * 0.6,
-                    )
-                  : const SizedBox.shrink(),
+              child:
+                  _imageFile == null
+                      ? Icon(
+                        Icons.person_add_alt_1_rounded,
+                        color: const Color.fromARGB(255, 175, 170, 170),
+                        size: circleSize * 0.6,
+                      )
+                      : const SizedBox.shrink(),
             ),
           ),
 
