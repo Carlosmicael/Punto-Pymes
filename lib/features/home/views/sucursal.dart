@@ -337,8 +337,8 @@ class SucursalPage extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.12,
-                vertical: 12,
+                horizontal: screenWidth * 0.1,
+                vertical: 17,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50),
@@ -358,7 +358,7 @@ class SucursalPage extends StatelessWidget {
                 ),
                 SizedBox(width: screenWidth * 0.025),
                 SvgPicture.asset(
-                  'lib/assets/images/flecha.svg',
+                  'lib/assets/images/Siguiente.svg',
                   height: screenWidth * 0.028,
                   width: screenWidth * 0.028,
                   color: Colors.white,

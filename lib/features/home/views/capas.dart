@@ -10,6 +10,8 @@ class Historial extends StatefulWidget {
 
 class _HistorialState extends State<Historial> {
   late PageController _pageController;
+  bool mostrarDetalle = false;
+  Map<String, dynamic>? registroActivo;
 
   int mesSeleccionado = 0;
 
@@ -38,21 +40,74 @@ class _HistorialState extends State<Historial> {
     {"dia": "D", "numero": "7"},
   ];
   int registroSeleccionado = -1;
-
-  final List<Map<String, String>> listaRegistros = [
+  final List<Map<String, dynamic>> listaRegistros = [
     {
       "fecha": "Jueves 23 de Octubre del 2025",
-      "estado": "normal",
-      "entrada": "Registrado",
-      "salida": "Sin registro",
+      "estadoGeneral": "Registrado",
+      "nroRegistro": "1",
+
+      "entrada": {
+        "horaEsperada": "7:00 AM",
+        "horaRegistrada": "7:01 AM",
+        "estado": "Retraso",
+        "asistencia": "Registrado",
+      },
+
+      "salida": {
+        "horaEsperada": "7:00 PM",
+        "horaRegistrada": "7:01 PM",
+        "estado": "Retraso",
+        "asistencia": "Registrado",
+      },
+
+      "horasTotales": "2 hr 20 min",
     },
-    {"fecha": "Jueves 23 de Octubre del 2025", "estado": "Falto"},
-    {"fecha": "Miércoles 12 de Octubre del 2025", "estado": "Con permiso"},
+
+    // -------------------------
+    // REGISTRO: FALTO
+    // -------------------------
     {
+      "nroRegistro": "2",
+      "fecha": "Jueves 23 de Octubre del 2025",
+      "estadoGeneral": "Falto",
+      "entrada": null,
+      "salida": null,
+    },
+
+    // -------------------------
+    // REGISTRO: CON PERMISO
+    // -------------------------
+    {
+      "nroRegistro": "3",
+      "fecha": "Miércoles 12 de Octubre del 2025",
+      "estadoGeneral": "Con permiso",
+      "entrada": null,
+      "salida": null,
+    },
+
+    // ---------------------------------------------
+    // REGISTRO COMPLETO PERO SALIDA SIN REGISTRO
+    // ---------------------------------------------
+    {
+      "nroRegistro": "4",
       "fecha": "Jueves 13 de Octubre del 2025",
-      "estado": "normal",
-      "entrada": "Registrado",
-      "salida": "Registrado",
+      "estadoGeneral": "Registrado",
+
+      "entrada": {
+        "horaEsperada": "7:00 AM",
+        "horaRegistrada": "7:00 AM",
+        "estado": "Normal",
+        "asistencia": "Registrado",
+      },
+
+      "salida": {
+        "horaEsperada": "7:00 PM",
+        "horaRegistrada": null,
+        "estado": null,
+        "asistencia": "Sin registro",
+      },
+
+      "horasTotales": "2 hr 20 min",
     },
   ];
 
@@ -70,6 +125,20 @@ class _HistorialState extends State<Historial> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void mostrarBottomSheet(Map<String, dynamic> registro) {
+    setState(() {
+      mostrarDetalle = true;
+      registroActivo = registro;
+    });
+  }
+
+  void cerrarBottomSheet() {
+    setState(() {
+      mostrarDetalle = false;
+      registroActivo = null;
+    });
   }
 
   @override
@@ -348,12 +417,21 @@ class _HistorialState extends State<Historial> {
                           final registro = listaRegistros[index];
                           final bool seleccionado =
                               registroSeleccionado == index;
+                          final bool mostrarBoton =
+                              (registro["entrada"]?["asistencia"] ==
+                                  "Registrado") ||
+                              (registro["salida"]?["asistencia"] ==
+                                  "Registrado");
 
-                          final String estado = registro["estado"] ?? "";
-                          final String entrada =
-                              registro["entrada"] ?? "Sin registro";
-                          final String salida =
-                              registro["salida"] ?? "Sin registro";
+                          final String estadoGeneral =
+                              registro["estadoGeneral"] ?? "";
+                          final entrada =
+                              registro["entrada"]; // puede ser null o Map
+                          final salida =
+                              registro["salida"]; // puede ser null o Map
+                          final nroRegistro =
+                              registro["nroRegistro"]; // <-- ES UN STRING
+
                           final String fecha = registro["fecha"] ?? "Sin fecha";
 
                           return GestureDetector(
@@ -424,6 +502,8 @@ class _HistorialState extends State<Historial> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
+                                          // FECHA
+                                          // FECHA
                                           Text(
                                             fecha,
                                             style: TextStyle(
@@ -433,100 +513,84 @@ class _HistorialState extends State<Historial> {
                                             ),
                                           ),
 
+                                          SizedBox(height: size.height * 0.01),
+
+                                          // NÚMERO DE REGISTRO (SE MUESTRA EN TODOS)
+                                          Text(
+                                            "Registro $nroRegistro",
+                                            style: TextStyle(
+                                              fontSize: size.width * 0.030,
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+
                                           SizedBox(height: size.height * 0.015),
 
-                                          if (estado == "normal") ...[
-                                            Text(
-                                              "Registro 1",
-                                              style: TextStyle(
-                                                color: Color(0xFFED6C7E),
-                                                fontSize: size.width * 0.03,
-                                              ),
-                                            ),
-
-                                            SizedBox(
-                                              height: size.height * 0.01,
-                                            ),
-
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  "Asistencia de entrada: ",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                    fontSize:
-                                                        size.width * 0.025,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  entrada,
-                                                  style: TextStyle(
-                                                    color: Colors.white70,
-                                                    fontSize:
-                                                        size.width * 0.025,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-
-                                            SizedBox(
-                                              height: size.height * 0.008,
-                                            ),
-
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  "Asistencia de salida: ",
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.white,
-                                                    fontSize:
-                                                        size.width * 0.025,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  salida,
-                                                  style: TextStyle(
-                                                    color: Colors.white70,
-                                                    fontSize:
-                                                        size.width * 0.025,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-
-                                            SizedBox(
-                                              height: size.height * 0.02,
-                                            ),
-
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                horizontal: size.width * 0.1,
-                                                vertical: size.height * 0.007,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
-                                                border: Border.all(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              child: const Text(
-                                                "Ver info",
+                                          // -----------------------------------------------------
+                                          //                 REGISTRO COMPLETO
+                                          // -----------------------------------------------------
+                                          if (estadoGeneral ==
+                                              "Registrado") ...[
+                                            if (entrada != null)
+                                              Text(
+                                                "Asistencia entrada: ${entrada["asistencia"]}",
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: size.width * 0.030,
                                                 ),
                                               ),
-                                            ),
-                                          ],
 
-                                          if (estado != "normal") ...[
+                                            SizedBox(
+                                              height: size.height * 0.010,
+                                            ),
+
+                                            if (salida != null)
+                                              Text(
+                                                "Asistencia salida: ${salida["asistencia"]}",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: size.width * 0.030,
+                                                ),
+                                              ),
+                                            if (mostrarBoton) ...[
+                                              const SizedBox(height: 10),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  shadowColor:
+                                                      Colors.transparent,
+                                                  foregroundColor: Colors.white,
+                                                  side: const BorderSide(
+                                                    color: Colors.white,
+                                                    width: 1.5,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          50,
+                                                        ), // Opcional
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  mostrarBottomSheet(
+                                                    registro,
+                                                  ); // <-- ACTIVA EL DETALLE
+                                                },
+                                                child: const Text(
+                                                  "Ver detalle",
+                                                ),
+                                              ),
+                                            ],
+                                          ]
+                                          // -----------------------------------------------------
+                                          //               FALTO / CON PERMISO
+                                          // -----------------------------------------------------
+                                          else ...[
                                             Text(
-                                              estado,
+                                              estadoGeneral,
                                               style: TextStyle(
-                                                fontSize: size.width * 0.03,
+                                                fontSize: size.width * 0.035,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
                                               ),
@@ -542,6 +606,7 @@ class _HistorialState extends State<Historial> {
                           );
                         }),
                       ),
+
                       SizedBox(height: h * 0.12),
                     ],
                   ),
@@ -549,6 +614,138 @@ class _HistorialState extends State<Historial> {
               ],
             ),
           ),
+          if (mostrarDetalle && registroActivo != null) ...[
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: cerrarBottomSheet,
+                child: Container(color: Colors.black.withOpacity(0.55)),
+              ),
+            ),
+
+            Positioned(
+              child: Center(
+                child: Container(
+                  width: size.width * 0.90,
+                  padding: EdgeInsets.all(size.width * 0.05),
+                  margin: EdgeInsets.only(bottom: 15),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(25),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 18,
+                        offset: Offset(0, -4),
+                      ),
+                    ],
+                  ),
+
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// TÍTULO
+                      if (registroActivo!["nroRegistro"] != null)
+                        Text(
+                          "Registro ${registroActivo!["nroRegistro"]}",
+                          style: TextStyle(
+                            fontSize: size.width * 0.055,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+
+                      const Divider(),
+
+                      /// FECHA
+                      if (registroActivo!["fecha"] != null)
+                        Text("Fecha: ${registroActivo!["fecha"]}"),
+
+                      /// HORAS TOTALES
+                      if (registroActivo!["horasTotales"] != null)
+                        Text(
+                          "Horas trabajadas: ${registroActivo!["horasTotales"]}",
+                        ),
+
+                      const SizedBox(height: 10),
+                      const Divider(),
+
+                      /// ENTRADA
+                      Text(
+                        "Entrada:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+
+                      if (registroActivo!["entrada"] != null) ...[
+                        if (registroActivo!["entrada"]["horaEsperada"] != null)
+                          Text(
+                            "Hora Entrada: ${registroActivo!["entrada"]["horaEsperada"]}",
+                          ),
+
+                        if (registroActivo!["entrada"]["horaRegistrada"] !=
+                            null)
+                          Text(
+                            "Hora Registrada: ${registroActivo!["entrada"]["horaRegistrada"]}",
+                          ),
+
+                        if (registroActivo!["entrada"]["estado"] != null)
+                          Text(
+                            "Estado: ${registroActivo!["entrada"]["estado"]}",
+                          ),
+
+                        if (registroActivo!["entrada"]["asistencia"] != null)
+                          Text(
+                            "Asistencia: ${registroActivo!["entrada"]["asistencia"]}",
+                          ),
+                      ] else
+                        Text("Sin entrada registrada"),
+
+                      const SizedBox(height: 10),
+                      const Divider(),
+
+                      /// SALIDA
+                      Text(
+                        "Salida:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+
+                      if (registroActivo!["salida"] != null) ...[
+                        if (registroActivo!["salida"]["horaEsperada"] != null)
+                          Text(
+                            "Hora Salida: ${registroActivo!["salida"]["horaEsperada"]}",
+                          ),
+
+                        if (registroActivo!["salida"]["horaRegistrada"] != null)
+                          Text(
+                            "Hora Registrada: ${registroActivo!["salida"]["horaRegistrada"]}",
+                          ),
+
+                        if (registroActivo!["salida"]["estado"] != null)
+                          Text(
+                            "Estado: ${registroActivo!["salida"]["estado"]}",
+                          ),
+
+                        if (registroActivo!["salida"]["asistencia"] != null)
+                          Text(
+                            "Asistencia: ${registroActivo!["salida"]["asistencia"]}",
+                          ),
+                      ] else
+                        Text("Sin salida registrada"),
+
+                      const SizedBox(height: 20),
+
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: cerrarBottomSheet,
+                          child: const Text("Cerrar"),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -10,9 +10,9 @@ class PantallaSucursal extends StatefulWidget {
 
 class _PantallaSucursalState extends State<PantallaSucursal> {
   final List<String> imagenes = const [
-    "https://plus.unsplash.com/premium_photo-1711031505781-2a45c879ceac?fm=jpg&q=60&w=3000",
-    "https://plus.unsplash.com/premium_photo-1711031505781-2a45c879ceac?fm=jpg&q=60&w=3000",
-    "https://plus.unsplash.com/premium_photo-1711031505781-2a45c879ceac?fm=jpg&q=60&w=3000",
+    "https://media.licdn.com/dms/image/v2/D4D22AQFZJZSsWQAhtw/feedshare-shrink_800/B4DZq2djBpHsAg-/0/1763997792917?e=2147483647&v=beta&t=yYAsl2lzVm2XwYbPOwwMaiyYen9ixPTH4pkBpsxDdC4",
+    "https://media.licdn.com/dms/image/v2/D4D22AQGEveEKh_UCpA/feedshare-shrink_800/B4DZq2djA.G8Ag-/0/1763997792504?e=2147483647&v=beta&t=vC8iPjbgYD6lcTgeJHtRA2Sl_OJr3hzOt5O9HWQC58I",
+    "https://media.licdn.com/dms/image/v2/D4D22AQF_CdPBwP-FKA/feedshare-shrink_800/B4DZq2djCpHsAg-/0/1763997793183?e=2147483647&v=beta&t=qjIC1CJC7ozf5r-vrM6caz-lvkzAqBevM8YjuUQUWfo",
   ];
 
   int currentIndex = 0; // Para abrir la imagen visible
@@ -42,69 +42,129 @@ class _PantallaSucursalState extends State<PantallaSucursal> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Encabezado
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back_ios_new),
-                ),
-                const Text("Volver", style: TextStyle(fontSize: 18)),
-              ],
+            const SizedBox(height: 75),
+            Padding(
+              padding: const EdgeInsets.only(left: 30, right: 30),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Text(
+                        "Volver",
+                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              "Sucursal Matriz - Centro",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+            Padding(
+              padding: const EdgeInsets.only(left: 30, right: 30),
+              child: Column(
+                children: [
+                  const Text(
+                    "Sucursal Matriz - Centro",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
 
-            // Carrusel con tap
-            Stack(
+            const SizedBox(height: 24),
+            Column(
               children: [
-                FanCarouselImageSlider.sliderType1(
-                  imagesLink: imagenes,
-                  isAssets: false,
-                  autoPlay: true,
-                  userCanDrag: true,
-                  sliderHeight: size.height * 0.30,
-                  showIndicator: true,
-                  imageRadius: 20,
-                  imageFitMode: BoxFit.cover,
-                  isClickable: false,
-                ),
-                Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        barrierColor: Colors.black.withOpacity(0.7),
-                        builder:
-                            (_) => Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.network(
-                                  imagenes[currentIndex],
-                                  width: size.width * 0.85,
-                                  height: size.height * 0.45,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                SizedBox(
+                  height: size.height * 0.32,
+                  child: PageView.builder(
+                    controller: PageController(viewportFraction: 0.70),
+                    itemCount: imagenes.length,
+                    onPageChanged: (index) {
+                      setState(() => currentIndex = index);
+
+                      if (index == imagenes.length - 1) {
+                        Future.delayed(const Duration(milliseconds: 350), () {
+                          PageController(viewportFraction: 0.70).jumpToPage(0);
+                          setState(() => currentIndex = 0);
+                        });
+                      }
+                    },
+                    itemBuilder: (_, index) {
+                      final bool isCenter = index == currentIndex;
+
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: isCenter ? 0 : 35,
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              barrierColor: Colors.black.withOpacity(0.7),
+                              builder:
+                                  (_) => Center(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Image.network(
+                                        imagenes[currentIndex],
+                                        width: size.width * 0.85,
+                                        height: size.height * 0.45,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.network(
+                              imagenes[index],
+                              fit: BoxFit.cover,
                             ),
+                          ),
+                        ),
                       );
                     },
-                    onHorizontalDragUpdate: (_) {}, // Mantiene scroll
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    imagenes.length,
+                    (i) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      margin: const EdgeInsets.symmetric(horizontal: 6),
+                      width: currentIndex == i ? 14 : 10,
+                      height: currentIndex == i ? 14 : 10,
+                      decoration: BoxDecoration(
+                        color:
+                            currentIndex == i
+                                ? const Color(0xFFE41335)
+                                : Colors.grey.withOpacity(0.4),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 24),
 
             // Datos de la sucursal
             Padding(
               padding: const EdgeInsets.all(
-                25,
+                30,
               ), // Aquí ajustas el padding general
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,20 +202,41 @@ class _PantallaSucursalState extends State<PantallaSucursal> {
 
             // Botón "Ver ubicación"
             Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // Acción del botón, por ejemplo abrir Google Maps
-                },
-                icon: const Icon(Icons.location_on),
-                label: const Text("Ver ubicación"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [Color(0xFFE41335), Color(0xFFED6C7E)],
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.35),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Acción del botón
+                  },
+                  icon: const Icon(Icons.location_on, color: Colors.white),
+                  label: const Text(
+                    "Ver ubicación",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 20,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                   ),
                 ),
               ),

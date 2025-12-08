@@ -356,7 +356,7 @@ class VacacionesScreen extends StatelessWidget {
                       },
                     ),
                   ),
-                  SizedBox(height: height * 0.45),
+                  SizedBox(height: height * 0.15),
                 ],
               ),
             ),
