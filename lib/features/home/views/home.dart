@@ -520,6 +520,11 @@ final List<Map<String, String>> categorias = [
     "asset": "lib/assets/images/Registro.svg",
     "ruta": AppRoutes.registroempleados,
   },
+  {
+    "nombre": "Homework",
+    "asset": "lib/assets/images/Homework.svg",
+    "ruta": AppRoutes.kpis,
+  },
 ];
 
 final List<Map<String, String>> asistencias = [

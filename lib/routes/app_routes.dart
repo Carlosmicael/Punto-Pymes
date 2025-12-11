@@ -16,4 +16,5 @@ class AppRoutes {
   static const vacaciones = '/vacaciones';
   static const solicitudVacacion = '/solicitudVacacion';
   static const detalleSucursal = '/detalleSucursal';
+  static const kpis = '/kpis';
 }

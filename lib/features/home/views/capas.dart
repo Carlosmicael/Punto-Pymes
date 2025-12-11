@@ -165,7 +165,7 @@ class _HistorialState extends State<Historial> {
                 // PARTE SUPERIOR (ANTES EXPANDED)
                 Container(
                   width: double.infinity,
-                  height: h * 0.40,
+                  height: 350,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -183,25 +183,26 @@ class _HistorialState extends State<Historial> {
 
                           SvgPicture.asset(
                             'lib/assets/images/capas.svg',
-                            height: 30,
+                            height: size.width * 0.05,
                             color: Colors.black,
                           ),
 
                           const SizedBox(width: 10),
 
-                          const Text(
+                          Text(
                             "Historial de Registro",
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: size.width * 0.03,
                               color: Colors.black,
-                              letterSpacing: 5,
+                              letterSpacing: 3,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
+                      // Carrusel circular de meses
                       SizedBox(
-                        height: h * 0.08,
+                        height: 100,
                         child: PageView.builder(
                           controller: _pageController,
                           onPageChanged: (index) {
@@ -212,17 +213,21 @@ class _HistorialState extends State<Historial> {
                           itemBuilder: (context, index) {
                             final int mesIndex = index % meses.length;
 
+                            // Evitar null en _pageController.page
                             final double currentPage =
                                 _pageController.hasClients &&
                                         _pageController.page != null
                                     ? _pageController.page!
                                     : _pageController.initialPage.toDouble();
 
-                            final double diff = (index - currentPage).abs();
-                            final bool esCentral = diff < 0.5;
+                            final double difference =
+                                (index - currentPage).abs();
+                            final bool esCentral = difference < 0.5;
+
                             final double scale = esCentral ? 1.2 : 0.9;
                             final double yOffset =
                                 (3 - scale) * 1 + (esCentral ? 25 : 0);
+
                             return GestureDetector(
                               onTap: () {
                                 if (_pageController.hasClients) {
@@ -270,7 +275,7 @@ class _HistorialState extends State<Historial> {
                         ),
                       ),
 
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 35),
                       SizedBox(
                         height: h * 0.1,
                         child: Row(
@@ -445,25 +450,6 @@ class _HistorialState extends State<Historial> {
                               child: Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                  // -----------------------------
-                                  // LÍNEA BLANCA FUERA DEL CUADRO
-                                  // -----------------------------
-                                  if (seleccionado)
-                                    Positioned(
-                                      left: size.width * 0.035,
-                                      top: 17,
-                                      bottom: 17,
-                                      child: Container(
-                                        width: 5,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
                                   // -----------------------------
                                   // CONTENEDOR PRINCIPAL
                                   // -----------------------------

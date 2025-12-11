@@ -1,4 +1,5 @@
 import 'package:auth_company/features/home/views/detalleSucursal.dart';
+import 'package:auth_company/features/home/views/kpis.dart';
 import 'package:flutter/material.dart';
 
 // 📌 IMPORTS HOME
@@ -67,6 +68,7 @@ class HomeApp extends StatelessWidget {
             (context) => HomeLayout(child: const SolicitudVacaciones()),
         AppRoutes.detalleSucursal:
             (context) => HomeLayout(child: PantallaSucursal()),
+        AppRoutes.kpis: (context) => HomeLayout(child: HomeworkScreen()),
       },
     );
   }

@@ -32,12 +32,12 @@ class _RegistroState extends State<RegistroEmpleados> {
 class CustomRegisterAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   final bool showGradient;
-  final double? heightFactor; // Factor para ajustar la altura según pantalla
+  final double? heightFactor;
 
   const CustomRegisterAppBar({
     super.key,
     required this.showGradient,
-    this.heightFactor = 0.15, // Por defecto 8% de la altura de la pantalla
+    this.heightFactor = 0.15,
   });
 
   @override
@@ -47,15 +47,19 @@ class CustomRegisterAppBar extends StatelessWidget
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final width = size.width;
-    final height = size.height * heightFactor!; // Altura responsiva
+    final height = size.height * heightFactor!;
 
-    final iconSize = width * 0.05; // Icono responsivo
-    final fontSize = width * 0.03; // Texto responsivo
-    final topPadding = height * 0.12; // Ajusta este valor según necesites
+    final iconSize = width * 0.05;
+    final fontSize = width * 0.03;
+
+    final topPadding = height * 0.0; // ⬆️ SUBIDO (antes 0.07)
+
+    // Si quieres aún más arriba:
+    // final topPadding = height * 0.0;   // TOTALMENTE pegado arriba
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      height: height,
+      height: 100,
       padding: EdgeInsets.symmetric(horizontal: width * 0.08),
       decoration: BoxDecoration(
         gradient:
@@ -72,22 +76,25 @@ class CustomRegisterAppBar extends StatelessWidget
         ),
       ),
       child: SafeArea(
+        top: false,
+        bottom: false,
         child: Padding(
-          padding: EdgeInsets.only(bottom: topPadding), // Espacio desde arriba
+          padding: const EdgeInsets.only(top: 50),
           child: Row(
             children: [
               SvgPicture.asset(
                 'lib/assets/images/Registro.svg',
                 width: iconSize,
                 height: iconSize,
+                color: showGradient ? Colors.white : Colors.transparent,
               ),
-              SizedBox(width: width * 0.02), // Espacio entre SVG y texto
+              SizedBox(width: width * 0.02),
               Text(
                 "Registro",
                 style: TextStyle(
-                  fontSize: fontSize,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: showGradient ? Colors.white : Colors.transparent,
                 ),
               ),
             ],
@@ -136,7 +143,7 @@ class RegisterBody extends StatelessWidget {
               clipper: _CurvedBottomClipper(),
               child: Container(
                 width: width,
-                height: height * 0.55,
+                height: height * 0.52,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Color(0xFF370B12), Color(0xFFE41335)],
@@ -159,7 +166,32 @@ class RegisterBody extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(height: height * 0.08),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 25,
+                            ), // 🔹 padding lateral
+                            child: Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'lib/assets/images/Registro.svg',
+                                  width: 17,
+                                  height: 17,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(width: width * 0.02),
+                                Text(
+                                  "Registro",
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: height * 0.02),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children:
