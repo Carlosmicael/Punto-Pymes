@@ -23,6 +23,7 @@ class _HomeLayoutState extends State<HomeLayout> {
   String? _currentUid;
   bool _isLoading = true;
   final LoginService _loginService = LoginService();
+  late Widget currentChild;
 
   // --- Lógica de Captura de Pantalla (del archivo copia) ---
   final GlobalKey previewKey = GlobalKey();
@@ -31,6 +32,7 @@ class _HomeLayoutState extends State<HomeLayout> {
   @override
   void initState() {
     super.initState();
+    currentChild = widget.child;
     _loadUserUid(); // Cargar datos del usuario
 
     // Capturar la pantalla después de que el frame inicial se haya dibujado
@@ -103,7 +105,18 @@ class _HomeLayoutState extends State<HomeLayout> {
       extendBodyBehindAppBar: true,
       appBar: CustomHomeAppBar(),
       // Pasar la imagen capturada al Drawer
-      drawer: AppDrawer(screenImage: screenImage), 
+      drawer: AppDrawer(
+        miniChild: currentChild,
+
+        // 🔥 Cuando el usuario toca la miniatura:
+        onMiniaturaSelected: (widgetSeleccionado) {
+          setState(() {
+            currentChild = widgetSeleccionado;
+          });
+
+          Navigator.pop(context); // cerrar drawer
+        },
+      ),
       body: Stack(
         children: [
           // Envolver el contenido (widget.child) en RepaintBoundary para la captura
@@ -114,6 +127,11 @@ class _HomeLayoutState extends State<HomeLayout> {
               padding: const EdgeInsets.only(bottom: 0), 
               child: widget.child,
             ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.only(bottom: 0),
+            child: currentChild,
           ),
           
           Positioned(

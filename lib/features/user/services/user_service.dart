@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:auth_company/features/auth/login/login_service.dart';
 import 'package:auth_company/config.dart';
+import 'package:auth_company/features/registro_asistencia/services/attendance_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Servicio encargado de manejar la lógica de perfil (Lectura y Actualización).
 class UserService {
@@ -59,5 +61,61 @@ class UserService {
       print("Error de conexión al actualizar perfil: $e");
       return false;
     }
+  }
+
+  Future<String> _obtenerToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('access_token') ?? '';
+  }
+
+  Future<String> _obtenerUid() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('user_uid') ?? '';
+  }
+
+  Future<Map<String, dynamic>?> getProfileRegistroManual() async {
+    final uid = await _obtenerUid();
+    final token = await _obtenerToken();
+
+    if (uid.isEmpty || token.isEmpty) {
+        print('DEBUG: UID o Token vacíos. Retornando null.'); 
+        return null;
+    }
+
+    try {
+      final url = Uri.parse("$baseUrl/users/$uid");
+      final response = await http.get(url, headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token", 
+      });
+
+      if (response.statusCode == 200) {
+        // ✅ La respuesta ahora contiene 'branchName'
+        return jsonDecode(response.body); 
+      } else {
+        print("Error al obtener perfil: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("Error de conexión al obtener perfil: $e");
+      return null;
+    }
+  }
+
+  // --- MÉTODO ESPECÍFICO PARA REGISTRO MANUAL ---
+  /// Retorna un mapa con Nombre, Apellido y Sucursal listos para la UI.
+  Future<Map<String, String>?> getEmployeeDataForManualRegistration() async {
+    final profileData = await getProfileRegistroManual();
+
+    if (profileData != null) {
+      return {
+        'nombre': profileData['nombre'] as String? ?? 'N/A',
+        'apellido': profileData['apellido'] as String? ?? 'N/A',
+        // ✅ Campo que trae el nombre de la sucursal del backend
+        'sucursal': profileData['branchName'] as String? ?? 'Sin asignar', 
+      };
+    }
+
+    return null;
   }
 }

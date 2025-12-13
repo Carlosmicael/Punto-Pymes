@@ -11,4 +11,5 @@ class AppRoutes {
   static const registroExitoso = '/registroExitoso';
   static const registroScan = '/registroScan';
   static const registroList = '/registroList';
+  static const registroManual = '/registroManual';
 }

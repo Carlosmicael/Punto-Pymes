@@ -30,7 +30,9 @@ class AttendanceService {
 
     // Imprimir el código de estado y el cuerpo de la respuesta
     print('--- RESPUESTA DEL SERVICIO ---');
-    print('URL de intento: $_baseUrl/register'); // ✅ Añade esto para verificar la IP
+    print(
+      'URL de intento: $_baseUrl/register',
+    ); // ✅ Añade esto para verificar la IP
     print('Status code: ${response.statusCode}');
     print('Cuerpo: ${response.body}');
     print('----------------------------');
@@ -41,10 +43,18 @@ class AttendanceService {
     if (response.body.isEmpty) {
       // Si el servidor retorna 201 sin contenido, lo tratamos como éxito simple.
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        return {'success': true, 'message': 'Registro exitoso (sin detalles adicionales).', 'tipo': 'desconocido', 'hora': 'N/A', 'estado': 'válido'};
+        return {
+          'success': true,
+          'message': 'Registro exitoso (sin detalles adicionales).',
+          'tipo': 'desconocido',
+          'hora': 'N/A',
+          'estado': 'válido',
+        };
       }
       // Si el código es 401/403/500 y está vacío, damos un error genérico.
-      throw const FormatException('El servidor devolvió un cuerpo vacío y un código de error.');
+      throw const FormatException(
+        'El servidor devolvió un cuerpo vacío y un código de error.',
+      );
     }
 
     final data = jsonDecode(response.body);
@@ -71,20 +81,90 @@ class AttendanceService {
     }
   }
 
-  /// (Opcional) Obtener historial para la pantalla 'register.dart'
-  Future<List<dynamic>> obtenerHistorial() async {
-    final token = await _obtenerToken();
-    // Asumiendo que crearás un endpoint GET en NestJS
-    final response = await http.get(
-      Uri.parse('$_baseUrl/history'),
-      headers: {'Authorization': 'Bearer $token'},
-    );
+  /// Metodo para obtener el historial de asistencias
+  Future<List<Map<String, dynamic>>> getHistory(token) async {
+    final token = await _obtenerToken(); // Obtener token dentro del método
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+    if (token.isEmpty) {
+      print('ALERTA: Token vacío. No se puede obtener historial.');
+      return [];
     }
-    return [];
+
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/history'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Token JWT
+        },
+      );
+
+      print('--- RESPUESTA DEL SERVICIO (HISTORY) ---');
+      print('URL de intento: $_baseUrl/history');
+      print('Status code: ${response.statusCode}');
+      print('----------------------------');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        return data.map((e) => e as Map<String, dynamic>).toList();
+      } else {
+        final data = json.decode(response.body);
+        throw Exception('Error al cargar historial: ${data['message']}');
+      }
+    } catch (e) {
+      print('Excepción en getHistory: $e');
+      return [];
+    }
   }
+
+
+  /// Registro Manual
+  Future<Map<String, dynamic>> registrarManual({
+    required String fecha, // YYYY-MM-DD
+    required String motivo,
+  }) async {
+    final token = await _obtenerToken();
+    if (token.isEmpty) return {'success': false, 'message': 'Sin sesión activa'};
+
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/register-manual'), 
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'fecha': fecha,
+          'motivo': motivo,
+        }),
+      );
+
+      print('--- MANUAL REGISTER ---');
+      print('Code: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'tipo': data['tipo'],
+          'message': data['message'],
+        };
+      } else {
+        final data = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Error al registrar',
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error de conexión: $e'};
+    }
+  }
+
+
+
+
 
   Future<String> _obtenerToken() async {
     final prefs = await SharedPreferences.getInstance();

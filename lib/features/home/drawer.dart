@@ -1,15 +1,15 @@
 import 'package:auth_company/features/auth/login/login_service.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui; // Necesario para ui.Image
 import 'package:flutter_svg/flutter_svg.dart'; // Necesario para SvgPicture
 
 class AppDrawer extends StatelessWidget {
-  // Propiedad para recibir la imagen de la pantalla capturada
-  final ui.Image? screenImage;
+  // 1. PROPIEDADES ACTUALIZADAS (Tomadas del drawer.dart original)
+  final Widget? miniChild;
+  final void Function(Widget widget)? onMiniaturaSelected;
 
-  // El constructor ahora acepta la imagen
-  const AppDrawer({super.key, this.screenImage});
+  // Se remueve 'this.screenImage'
+  const AppDrawer({super.key, this.miniChild, this.onMiniaturaSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -17,11 +17,12 @@ class AppDrawer extends StatelessWidget {
 
     // Variables de diseño del archivo copia
     final double drawerWidth = size.width;
-    final double previewWidth = drawerWidth * 0.25; 
-    final double previewHeight = drawerWidth * 0.40; 
+    final double previewWidth = drawerWidth * 0.20;
+    final double previewHeight = size.height * 0.55;
+
     final String currentRoute = ModalRoute.of(context)?.settings.name ?? '';
 
-    // Lista de categorías del archivo copia (ejemplo, se asume que las rutas y assets son correctos)
+    // 2. Lista de categorías del archivo copia (ejemplo, se asume que las rutas y assets son correctos)
     final List<Map<String, String>> categorias = [
       {
         "nombre": "Home",
@@ -167,8 +168,7 @@ class AppDrawer extends StatelessWidget {
                                 // Lista de categorías
                                 Expanded(
                                   child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children:
@@ -179,7 +179,9 @@ class AppDrawer extends StatelessWidget {
                                             ),
                                             child: InkWell(
                                               onTap: () {
-                                                Navigator.pop(context); // Cierra el drawer
+                                                Navigator.pop(
+                                                  context,
+                                                ); // Cierra el drawer
                                                 // Navega a la ruta
                                                 Navigator.pushNamed(
                                                   context,
@@ -206,9 +208,7 @@ class AppDrawer extends StatelessWidget {
                                                           ),
                                                     )
                                                   else
-                                                    const SizedBox(
-                                                      width: 8,
-                                                    ),
+                                                    const SizedBox(width: 8),
 
                                                   const SizedBox(width: 15),
                                                   // SVG del menú
@@ -224,7 +224,11 @@ class AppDrawer extends StatelessWidget {
                                                           context,
                                                         ).size.width *
                                                         0.05,
-                                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn), // Usar colorFilter en lugar de 'color' (obsoleto)
+                                                    colorFilter:
+                                                        const ColorFilter.mode(
+                                                          Colors.white,
+                                                          BlendMode.srcIn,
+                                                        ), // Usar colorFilter en lugar de 'color' (obsoleto)
                                                   ),
                                                   const SizedBox(width: 15),
 
@@ -262,7 +266,10 @@ class AppDrawer extends StatelessWidget {
                                     print("Token eliminado correctamente");
 
                                     // Navegar al login
-                                    Navigator.pushReplacementNamed(context, AppRoutes.login);
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      AppRoutes.login,
+                                    );
                                   },
                                   child: Row(
                                     children: [
@@ -270,7 +277,10 @@ class AppDrawer extends StatelessWidget {
                                         'lib/assets/images/Logout.svg', // Asume que este asset existe
                                         width: size.width * 0.05,
                                         height: size.width * 0.05,
-                                        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                        colorFilter: const ColorFilter.mode(
+                                          Colors.white,
+                                          BlendMode.srcIn,
+                                        ),
                                       ),
                                       const SizedBox(width: 10),
                                       Flexible(
@@ -294,84 +304,66 @@ class AppDrawer extends StatelessWidget {
 
                         const SizedBox(width: 16),
 
-                        // ───────── Columna de Miniaturas (Preview de pantalla) ─────────
-                        // Las miniaturas solo están presentes si screenImage no es nulo
-                        if (screenImage != null)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Miniatura 1
-                              GestureDetector(
-                                onTap: () => Navigator.pop(context),
+                        // 3. SECCIÓN DE MINIATURA CON miniChild (Tomada de drawer.dart original)
+                        // Se mantiene solo la miniatura más grande para simplificar
+                        if (miniChild != null)
+                          GestureDetector(
+                            onTap: () {
+                              if (onMiniaturaSelected != null &&
+                                  miniChild != null) {
+                                // Llama a la función si está definida
+                                onMiniaturaSelected!(miniChild!);
+                              }
+                            },
+                            child: ClipRect(
+                              child: Align(
+                                alignment: Alignment.centerLeft,
                                 child: SizedBox(
-                                  child: ClipRect(
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      widthFactor: 0.20,
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            const BorderRadius.only(
-                                              topLeft: Radius.circular(30),
-                                              bottomLeft: Radius.circular(30),
-                                            ),
-                                        child: SizedBox(
-                                          width: previewWidth * 2.5,
-                                          height: previewHeight * 3.0,
-                                          child: Stack(
-                                            fit: StackFit.expand,
-                                            children: [
-                                              RawImage(
-                                                image: screenImage,
-                                                fit: BoxFit.cover,
-                                              ),
-                                              Container( // Overlay oscuro
-                                                color: Colors.black
-                                                    .withOpacity(0.4),
-                                              ),
-                                            ],
+                                  width:
+                                      previewWidth, // Usando el tamaño calculado
+                                  height:
+                                      previewHeight, // Usando el tamaño calculado
+                                  child: ClipRRect(
+                                    borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(22),
+                                      bottomLeft: Radius.circular(22),
+                                    ),
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        FittedBox(
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.topLeft,
+                                          child: SizedBox(
+                                            width: size.width,
+                                            height: size.height,
+                                            child:
+                                                miniChild ??
+                                                Container(
+                                                  color: const Color.fromARGB(
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0,
+                                                  ),
+                                                ),
                                           ),
                                         ),
-                                      ),
+                                        Container(color: Colors.transparent),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ),
-                              // Miniatura 2
-                              GestureDetector(
-                                onTap: () => Navigator.pop(context),
-                                child: SizedBox(
-                                  child: ClipRect(
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      widthFactor: 0.25,
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            const BorderRadius.only(
-                                              topLeft: Radius.circular(30),
-                                              bottomLeft: Radius.circular(30),
-                                            ),
-                                        child: SizedBox(
-                                          width: previewWidth * 3.0,
-                                          height: previewHeight * 3.5,
-                                          child: RawImage(
-                                            image: screenImage,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           )
                         else
-                          // Mostrar un widget alternativo si la imagen no está disponible
+                          // Widget alternativo si la miniatura no está disponible (adaptado)
                           const Center(
                             child: Padding(
                               padding: EdgeInsets.only(right: 20),
                               child: Icon(
-                                Icons.info_outline,
+                                Icons.image_not_supported,
                                 size: 50,
                                 color: Colors.white70,
                               ),

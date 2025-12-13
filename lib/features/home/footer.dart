@@ -158,8 +158,26 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
 
   @override
   Widget build(BuildContext context) {
+    // Aquí puedes detectar si el teclado está visible.
+    // 'viewInsets.bottom' es el espacio ocupado por el teclado.
+    final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    
+    // Si bottomInset > 0, el teclado está visible.
+    final bool isKeyboardVisible = bottomInset > 0.0;
+
     final double width = MediaQuery.of(context).size.width;
     final double height = MediaQuery.of(context).size.height;
+
+    // Si el teclado está visible, devuelve un Container vacío o un SizedBox.shrink().
+    // Esto oculta el footer. Puedes usar una animación para que la transición sea suave.
+    if (isKeyboardVisible) {
+      return SizedBox.shrink(); 
+      // O si deseas una transición con altura:
+      // return AnimatedContainer(
+      //   duration: const Duration(milliseconds: 200),
+      //   height: 0,
+      // );
+    }
 
     
 

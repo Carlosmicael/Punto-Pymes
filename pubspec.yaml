@@ -47,7 +47,7 @@ dependencies:
   camera: ^0.10.5+5
 
   flutter_svg: ^2.1.1
-
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

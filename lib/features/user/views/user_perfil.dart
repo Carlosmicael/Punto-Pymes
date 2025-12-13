@@ -2,13 +2,17 @@ import 'package:auth_company/features/user/services/user_service.dart';
 import 'package:auth_company/features/auth/login/login_service.dart';
 import 'package:flutter/material.dart';
 
-// Definición de colores
+// Definición de colores del diseño original
 const Color _kPrimaryTextColor = Colors.black87;
 const Color _kSecondaryTextColor = Colors.black54;
 const Color _kLightGrey = Color(0xFFE0E0E0);
 
+// -------------------------------------------------------------------------
+// WIDGET PRINCIPAL (Stateful para la lógica)
+// -------------------------------------------------------------------------
+
 class ProfileScreen extends StatefulWidget {
-  // El UID debe ser pasado a la pantalla
+  // Ahora requiere el UID, como en la copia funcional
   final String uid;
 
   const ProfileScreen({super.key, required this.uid});
@@ -18,20 +22,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Controladores para los campos
+  // Controladores y servicios
   final LoginService _loginService = LoginService();
   final UserService _userService = UserService();
   final TextEditingController _nombresCtrl = TextEditingController();
   final TextEditingController _apellidosCtrl = TextEditingController();
   final TextEditingController _telefonoCtrl = TextEditingController();
-
-  // No editables (solo lectura)
-  final TextEditingController _cedulaCtrl = TextEditingController();
-  final TextEditingController _correoCtrl = TextEditingController();
+  final TextEditingController _cedulaCtrl = TextEditingController(); // Solo lectura
+  final TextEditingController _correoCtrl = TextEditingController(); // Solo lectura
 
   String _fotoPerfilUrl = '';
   bool _isLoading = true;
-  String _selectedGender = 'masculino'; // o el valor que cargues
+  String _selectedGender = 'masculino';
 
   @override
   void initState() {
@@ -39,29 +41,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfileData();
   }
 
-  // Método para cargar datos del Backend
+  // Lógica de carga del perfil
   Future<void> _loadProfileData() async {
     setState(() => _isLoading = true);
 
-    // Paso 1: Obtener el token guardado
     final authToken = await _loginService.getSavedToken();
 
     if (authToken == null) {
       if (mounted) {
         setState(() => _isLoading = false);
-        // Manejo de error si no hay token (ej. redirigir a Login)
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: No se encontró token de sesión.')),
+          const SnackBar(
+              content: Text('Error: No se encontró token de sesión.')),
         );
       }
       return;
     }
 
-    // Paso 2: Llamar al servicio y pasar el token
     final data = await _userService.getProfile(widget.uid, authToken);
 
     if (data != null && mounted) {
-      // Asignar los valores a los controladores
       _nombresCtrl.text = data['nombre'] ?? '';
       _apellidosCtrl.text = data['apellido'] ?? '';
       _telefonoCtrl.text = data['telefono'] ?? '';
@@ -72,7 +71,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() => _isLoading = false);
     } else if (mounted) {
-      // Manejo de error si la carga falla
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al cargar los datos del perfil.')),
@@ -80,22 +78,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Método para guardar la edición
+  // Lógica de guardado del perfil
   Future<void> _saveProfileChanges() async {
-
-    // Paso 1: Obtener el token JWT guardado.
     final authToken = await _loginService.getSavedToken();
-    
+
     if (authToken == null) {
-        if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Error: No se encontró token para guardar cambios.')),
-            );
-        }
-        return;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('Error: No se encontró token para guardar cambios.')),
+        );
+      }
+      return;
     }
 
-    // Recolectar solo los datos que se pueden editar
     final userData = {
       "nombre": _nombresCtrl.text,
       "apellido": _apellidosCtrl.text,
@@ -103,68 +100,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
       "genero": _selectedGender,
     };
 
-    // Intentar actualizar
-    // Paso 2: Pasar el token al servicio
-    final success = await _userService.updateProfile(widget.uid, userData, authToken);
+    final success =
+        await _userService.updateProfile(widget.uid, userData, authToken);
 
     if (mounted) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              '¡Perfil actualizado con éxito!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            padding: const EdgeInsets.all(20),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success ? '¡Perfil actualizado con éxito!' : 'Falló la actualización.',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Falló la actualización.',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            padding: const EdgeInsets.all(20),
-          ),
-        );
-      }
+          backgroundColor: success ? Colors.green : Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          padding: const EdgeInsets.all(20),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final height = size.height;
     final width = size.width;
 
-    // Si está cargando, muestra un indicador
     if (_isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(child: CircularProgressIndicator()));
     }
 
+    // Usa Scaffold con fondo blanco del diseño original
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Usa el URL de la foto de perfil en el header
-            _ProfileHeader(fotoUrl: _fotoPerfilUrl),
+            // El header usa el diseño visual de user_perfil.dart y el URL dinámico
+            _ProfileHeader(
+              fondoUrl: _fotoPerfilUrl, // Para el fondo (si es la misma imagen)
+              avatarUrl: _fotoPerfilUrl, // Para el avatar
+            ),
+
+            // Contenido de la información del perfil
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              // Pasa los controladores y el género a la sección de info
+              // Pasa los controladores y callbacks a la sección de información
               child: _ProfileInfoSection(
                 nombresCtrl: _nombresCtrl,
                 apellidosCtrl: _apellidosCtrl,
@@ -179,14 +162,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
               ),
             ),
+            
+            // Botón de Guardar de la copia funcional
             SizedBox(
               width: width * 0.6,
-              height: height * 0.065,
+              height: size.height * 0.065,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEB455E),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(height * 0.05),
+                    borderRadius: BorderRadius.circular(size.height * 0.05),
                   ),
                 ),
                 onPressed: _saveProfileChanges,
@@ -200,20 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20.0,
-                vertical: 45.0,
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 20,
-                child: Text(
-                  'Hola',
-                  style: TextStyle(fontSize: 18, color: Colors.transparent),
-                ),
-              ),
-            ),
+            const SizedBox(height: 100), // Espacio final
           ],
         ),
       ),
@@ -231,54 +203,119 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-// WIDGET DE LA CABECERA
-class _ProfileHeader extends StatelessWidget {
-  final String fotoUrl;
+// -------------------------------------------------------------------------
+// WIDGET DE LA CABECERA (Adaptado con URL dinámico, manteniendo el diseño)
+// -------------------------------------------------------------------------
 
-  const _ProfileHeader({required this.fotoUrl});
+class _ProfileHeader extends StatelessWidget {
+  final String fondoUrl;
+  final String avatarUrl;
+
+  const _ProfileHeader({required this.fondoUrl, required this.avatarUrl});
 
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
-    final double headerHeight = screenHeight * 0.35;
+    final double headerHeight = screenHeight * 0.40;
 
-    // Usamos NetworkImage si fotoUrl no está vacío, de lo contrario un ícono de persona.
-    final ImageProvider avatarImage =
-        fotoUrl.isNotEmpty
-            ? NetworkImage(fotoUrl) as ImageProvider
-            : const AssetImage(
-              'assets/icons/perfil.png',
-            ); // Usa un asset por defecto local
+    // Proveedores de imagen
+    final ImageProvider fondoImage = fondoUrl.isNotEmpty
+        ? NetworkImage(fondoUrl)
+        : const AssetImage('assets/images/default_bg.png'); // Placeholder
+    final ImageProvider avatarImage = avatarUrl.isNotEmpty
+        ? NetworkImage(avatarUrl)
+        : const AssetImage('assets/icons/perfil.png'); // Placeholder
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // Fondo de color
+        // 1. Contenedor de la Imagen de Fondo y Sombra Difuminada (Diseño Original)
         Container(
           height: headerHeight,
-          decoration: const BoxDecoration(
-            color: Colors.redAccent, // Color de fondo
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: fondoImage, // Usamos la URL dinámica aquí
+              fit: BoxFit.cover,
             ),
+          ),
+          child: Column(
+            children: [
+              const Spacer(),
+              // Gradiente Difuminado (Fade-out) en la parte inferior de la imagen
+              Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.white.withOpacity(1.0),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
 
-        // Avatar del Usuario
+        // 2. Avatar de Perfil Grande y Flotante (Diseño Original)
         Positioned(
-          bottom: -50, // Lo mueve 50 unidades fuera del Container
+          top: headerHeight - 110,
           left: 0,
           right: 0,
-          child: Column(
-            children: [
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.white,
-                backgroundImage: avatarImage, // Aquí se carga la imagen
-              ),
-              const SizedBox(height: 10),
-            ],
+          child: Center(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 180,
+                  height: 180,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                    // Avatar con la imagen dinámica
+                    image: DecorationImage(
+                      image: avatarImage, // Usamos la URL dinámica aquí
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+
+                // Botón de la Cámara (Diseño Original)
+                Positioned(
+                  bottom: 10,
+                  right: -5,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.photo_camera_outlined,
+                      color: _kSecondaryTextColor,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -286,9 +323,12 @@ class _ProfileHeader extends StatelessWidget {
   }
 }
 
-// WIDGET DE INFORMACIÓN
+// -------------------------------------------------------------------------
+// WIDGET DE LA SECCIÓN DE INFORMACIÓN (Adaptado con TextFormField y lógica)
+// -------------------------------------------------------------------------
+
 class _ProfileInfoSection extends StatelessWidget {
-  // Los controladores ahora son obligatorios
+  // Parámetros de la copia funcional
   final TextEditingController nombresCtrl;
   final TextEditingController apellidosCtrl;
   final TextEditingController cedulaCtrl;
@@ -312,57 +352,59 @@ class _ProfileInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 70), // Espacio para que el avatar no se monte
-        // Campos Editables
-        _buildTextField(
-          label: 'Nombres',
-          controller: nombresCtrl,
-          isEditable: true,
+        const SizedBox(height: 70), // Espacio para el avatar flotante
+        // Título "Perfil" (Diseño Original)
+        const Text(
+          'Perfil',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: _kPrimaryTextColor,
+          ),
         ),
+
+        const SizedBox(height: 30),
+
+        // Campos Editables (Usando el diseño de TextFormField de la copia)
         _buildTextField(
-          label: 'Apellidos',
-          controller: apellidosCtrl,
-          isEditable: true,
-        ),
+            label: 'Nombres:', controller: nombresCtrl, isEditable: true),
         _buildTextField(
-          label: 'Teléfono',
-          controller: telefonoCtrl,
-          isEditable: true,
-        ),
+            label: 'Apellidos:', controller: apellidosCtrl, isEditable: true),
+        _buildTextField(
+            label: 'Numero de telefono:',
+            controller: telefonoCtrl,
+            isEditable: true),
 
         // Campos NO Editables (Solo Lectura)
         _buildTextField(
-          label: 'Cédula',
-          controller: cedulaCtrl,
-          isEditable: false,
-        ),
+            label: 'Cedula:', controller: cedulaCtrl, isEditable: false),
         _buildTextField(
-          label: 'Correo',
-          controller: correoCtrl,
-          isEditable: false,
-        ),
+            label: 'Correo:', controller: correoCtrl, isEditable: false),
 
-        const SizedBox(height: 15),
+        const SizedBox(height: 30),
 
-        // Selector de Género
+        // Sección Género (Diseño Original/Adaptado)
         _buildGenderSelector(),
 
-        const SizedBox(height: 40),
+        const SizedBox(height: 50),
       ],
     );
   }
 
-  // Helper para construir campos de texto
+  // Helper para construir campos de texto (Diseño de la copia funcional)
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
     required bool isEditable,
   }) {
+    // Para mantener el diseño original que usa un divisor, usaremos un
+    // TextFormField con un borde inferior y Padding.
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20.0),
+      padding: const EdgeInsets.only(bottom: 25.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Título del campo (Diseño Original)
           Text(
             label,
             style: const TextStyle(
@@ -371,29 +413,30 @@ class _ProfileInfoSection extends StatelessWidget {
               color: _kPrimaryTextColor,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
+
+          // Valor del campo (TextFormField de la copia funcional, pero estilizado)
           TextFormField(
             controller: controller,
-            readOnly:
-                !isEditable, // Deshabilita la edición si isEditable es falso
+            readOnly: !isEditable,
             style: TextStyle(
-              color: isEditable ? _kSecondaryTextColor : Colors.grey,
-              fontWeight: FontWeight.w500,
+              fontSize: 18,
+              fontWeight: FontWeight.w400,
+              color: isEditable ? _kSecondaryTextColor : Colors.grey[600],
             ),
             decoration: InputDecoration(
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(vertical: 5),
               filled: !isEditable,
-              fillColor: isEditable ? Colors.white : Colors.grey[100],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: isEditable ? _kLightGrey : Colors.transparent,
-                ),
+              fillColor: isEditable ? Colors.white : Colors.grey[50],
+              enabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: _kLightGrey, width: 1),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
-                  color: isEditable ? _kLightGrey : Colors.transparent,
-                ),
+              focusedBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: _kPrimaryTextColor, width: 2),
+              ),
+              disabledBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: _kLightGrey, width: 1),
               ),
             ),
           ),
@@ -402,13 +445,13 @@ class _ProfileInfoSection extends StatelessWidget {
     );
   }
 
-  // Selector de Género
+  // Selector de Género (Combinación de lógica y diseño)
   Widget _buildGenderSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Género',
+          'Genero',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -418,20 +461,20 @@ class _ProfileInfoSection extends StatelessWidget {
         const SizedBox(height: 15),
         Row(
           children: [
-            // Botón Masculino
+            // Botón Hombre
             GestureDetector(
               onTap: () => onGenderChanged('masculino'),
               child: _buildGenderButton(
-                Icons.male,
+                Icons.male, 
                 selectedGender == 'masculino',
               ),
             ),
             const SizedBox(width: 15),
-            // Botón Femenino
+            // Botón Mujer
             GestureDetector(
               onTap: () => onGenderChanged('femenino'),
               child: _buildGenderButton(
-                Icons.female,
+                Icons.female, 
                 selectedGender == 'femenino',
               ),
             ),
@@ -441,33 +484,35 @@ class _ProfileInfoSection extends StatelessWidget {
     );
   }
 
-  // Constructor de botones de género
+  // Constructor de botones de género (Diseño Original)
   Widget _buildGenderButton(IconData icon, bool isSelected) {
+    // Usamos el color de selección del diseño original (Gris Oscuro)
+    const Color selectedColor = Colors.black87; 
+
     return Container(
       width: 55,
       height: 55,
       decoration: BoxDecoration(
-        color: isSelected ? Colors.blue[100] : Colors.white,
+        color: isSelected ? selectedColor : Colors.white,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isSelected ? Colors.blueAccent : _kLightGrey,
-          width: isSelected ? 2 : 1,
+          color: isSelected ? selectedColor : _kLightGrey,
+          width: isSelected ? 0 : 1,
         ),
-        boxShadow:
-            isSelected
-                ? [
-                  BoxShadow(
-                    color: Colors.blueAccent.withOpacity(0.2),
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-                : null,
+        boxShadow: isSelected
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : null,
       ),
       child: Icon(
         icon,
+        color: isSelected ? Colors.white : Colors.black54,
         size: 30,
-        color: isSelected ? Colors.blueAccent : Colors.grey[600],
       ),
     );
   }

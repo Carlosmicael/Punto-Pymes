@@ -1,6 +1,7 @@
 import 'package:auth_company/features/registro_asistencia/views/registerList.dart';
 import 'package:auth_company/features/registro_asistencia/views/registroExitoso.dart';
 import 'package:auth_company/features/registro_asistencia/views/registroScan.dart';
+import 'package:auth_company/features/registro_asistencia/views/registroManual.dart';
 import 'package:flutter/material.dart';
 import 'routes/app_routes.dart';
 import 'features/auth/splash_screen.dart';
@@ -32,7 +33,9 @@ class HomeApp extends StatelessWidget {
         AppRoutes.registroScan:
             (context) => const HomeLayout(child: RegistroScanScreen()),
         AppRoutes.registroList:
-            (context) => const HomeLayout(child: RegistroEmpleados()),           
+            (context) => const HomeLayout(child: RegistroEmpleados()),   
+        AppRoutes.registroManual:
+            (context) => const HomeLayout(child: RegistroManual()),        
       },
     );
   }
