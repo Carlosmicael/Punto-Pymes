@@ -12,4 +12,9 @@ class AppRoutes {
   static const registroScan = '/registroScan';
   static const registroList = '/registroList';
   static const registroManual = '/registroManual';
+
+  static const detalleSucursal = '/detalleSucursal';
+  static const sucursal = '/sucursal';
+
+  static const kpis = '/kpis';
 }

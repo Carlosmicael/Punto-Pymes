@@ -493,7 +493,7 @@ final List<Map<String, String>> categorias = [
   {
     "nombre": "Sucursal",
     "asset": "lib/assets/images/Sucursal.svg",
-    "ruta": AppRoutes.capas,
+    "ruta": AppRoutes.sucursal,
   },
   {
     "nombre": "Calendar",

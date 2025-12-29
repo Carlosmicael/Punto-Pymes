@@ -11,6 +11,11 @@ import 'features/home/home_layout.dart';
 import 'features/home/views/home_screen.dart';
 import 'features/auth/splash_screen_welcome.dart';
 
+import 'features/sucursales/views/sucursal.dart';
+import 'features/sucursales/views/detalleSucursal.dart';
+
+import 'package:auth_company/features/kpis/views/kpis.dart';
+
 class HomeApp extends StatelessWidget {
   const HomeApp({super.key});
 
@@ -33,9 +38,17 @@ class HomeApp extends StatelessWidget {
         AppRoutes.registroScan:
             (context) => const HomeLayout(child: RegistroScanScreen()),
         AppRoutes.registroList:
-            (context) => const HomeLayout(child: RegistroEmpleados()),   
+            (context) => const HomeLayout(child: RegistroEmpleados()),
         AppRoutes.registroManual:
-            (context) => const HomeLayout(child: RegistroManual()),        
+            (context) => const HomeLayout(child: RegistroManual()),
+
+        AppRoutes.sucursal:
+            (context) => const HomeLayout(child: SucursalPage()),
+        AppRoutes.detalleSucursal:
+            (context) => const HomeLayout(child: PantallaSucursal()),
+
+        AppRoutes.kpis: 
+        (context) => const HomeLayout(child: KpisScreen(companyId: '', employeeId: '',)),
       },
     );
   }

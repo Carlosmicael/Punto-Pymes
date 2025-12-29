@@ -86,22 +86,25 @@ class _HomeLayoutState extends State<HomeLayout> {
   Widget build(BuildContext context) {
     // 1. Mostrar un indicador de carga si aún no tenemos el UID
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    
+
     // 2. Manejar si el UID es nulo (Usuario no autenticado)
     if (_currentUid == null) {
       // **AQUÍ SE DEBE IMPLEMENTAR LA REDIRECCIÓN A LA PANTALLA DE LOGIN**
       // Por ejemplo: Navigator.pushReplacementNamed(context, AppRoutes.login);
       return const Scaffold(
-        body: Center(child: Text('Error: Usuario no autenticado. Redirigiendo...')),
+        body: Center(
+          child: Text('Error: Usuario no autenticado. Redirigiendo...'),
+        ),
       );
     }
 
+    final bool isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     // 3. Renderizar el layout principal
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       appBar: CustomHomeAppBar(),
       // Pasar la imagen capturada al Drawer
@@ -124,7 +127,7 @@ class _HomeLayoutState extends State<HomeLayout> {
             key: previewKey,
             child: Padding(
               // El padding es para evitar posibles desbordamientos al capturar la imagen
-              padding: const EdgeInsets.only(bottom: 0), 
+              padding: const EdgeInsets.only(bottom: 0),
               child: widget.child,
             ),
           ),
@@ -133,17 +136,17 @@ class _HomeLayoutState extends State<HomeLayout> {
             padding: const EdgeInsets.only(bottom: 0),
             child: currentChild,
           ),
-          
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            // Pasar el UID al footer
-            child: AnimatedFloatingFooter(
-              initialIndex: widget.initialIndex ?? 0,
-              uid: _currentUid, // Pasar el UID
+
+          if (!isKeyboardVisible)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: AnimatedFloatingFooter(
+                initialIndex: widget.initialIndex ?? 0,
+                uid: _currentUid,
+              ),
             ),
-          ),
         ],
       ),
     );

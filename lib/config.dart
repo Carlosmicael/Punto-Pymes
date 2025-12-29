@@ -1,5 +1,5 @@
 /// Dirección IP del backend 
-const String serverIp = "172.17.161.254";
+const String serverIp = "172.17.187.66";
 
 /// Puerto del backend principal (NestJS)
 const int serverPort = 3000;
@@ -12,3 +12,10 @@ String baseUrll = "http://$serverIp:$serverPort";
 
 /// URL base para attendance
 String attendanceUrl = "http://$serverIp:$serverPort/$attendancePath"; 
+
+/// URL base para sucursales
+String sucursalesUrl = "$baseUrll/sucursales";
+
+/// URL base para kpis
+const String kpisPath = "kpis";
+String kpisUrl = "$baseUrll/$kpisPath";
