@@ -67,4 +67,28 @@ class KpiService {
       return [];
     }
   }
+
+
+  // 4. Obtener lista de KPIs COMPLETADOS (Historial de hoy)
+  Future<List<Map<String, dynamic>>> getCompletedKpis(
+    String companyId,
+    String employeeId,
+  ) async {
+    try {
+      // Asegúrate que esta URL coincida con tu backend
+      final url = Uri.parse(
+        '$kpisUrl/completed?companyId=$companyId&employeeId=$employeeId',
+      );
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((item) => item as Map<String, dynamic>).toList();
+      }
+      return [];
+    } catch (e) {
+      print("Error obteniendo KPIs completados: $e");
+      return [];
+    }
+  }
 }

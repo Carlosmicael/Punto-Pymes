@@ -140,8 +140,8 @@ class _SucursalPageState extends State<SucursalPage> {
             circleId: CircleId("circle_$id"),
             center: LatLng(lat, lng),
             radius: (s['rangoGeografico'] as num).toDouble(),
-            fillColor: Colors.green.withOpacity(0.3),
-            strokeColor: Colors.green,
+            fillColor: Colors.red.withOpacity(0.3),
+            strokeColor: Colors.red,
             strokeWidth: 2,
           ),
         );

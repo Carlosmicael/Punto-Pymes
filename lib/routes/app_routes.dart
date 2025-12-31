@@ -17,4 +17,6 @@ class AppRoutes {
   static const sucursal = '/sucursal';
 
   static const kpis = '/kpis';
+
+  static const horario = '/horario';
 }

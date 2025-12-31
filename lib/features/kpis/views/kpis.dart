@@ -38,7 +38,7 @@ class _KpisScreenState extends State<KpisScreen> {
     _evaluateAutomaticKpi();
 
     // B. Cargar lista de tareas pendientes
-    await _fetchPendingKpis();
+    await _fetchAllDailyKpis();
   }
 
   // --- SERVICIOS HTTP INTEGRADOS ---
@@ -47,26 +47,98 @@ class _KpisScreenState extends State<KpisScreen> {
     await _kpiService.evaluateAutomaticKpi(widget.companyId, widget.employeeId);
   }
 
-  Future<void> _fetchPendingKpis() async {
-    final data = await _kpiService.getPendingKpis(
-      widget.companyId,
-      widget.employeeId,
-    );
-    setState(() {
-      tareas =
-          data.map((item) {
-            return {
-              "id": item["id"],
-              "titulo": item["nombre"],
-              "categoria": item["categoria"],
-              "fecha": DateTime.parse(item["fecha"]).toLocal(),
-            };
-          }).toList();
-      isLoading = false;
-    });
+  Future<void> _fetchAllDailyKpis() async {
+    setState(() => isLoading = true);
+    DateFormat inputFormat = DateFormat("dd/MM/yyyy, h:mm:ss a");
+
+    try {
+      // Hacemos las dos peticiones en paralelo para mayor velocidad
+      final results = await Future.wait([
+        _kpiService.getPendingKpis(widget.companyId, widget.employeeId),
+        _kpiService.getCompletedKpis(widget.companyId, widget.employeeId),
+      ]);
+
+      debugPrint("DEBUG: Pendientes recibidos: ${results[0].length}");
+      debugPrint("DEBUG: Completados recibidos: ${results[1].length}");
+      if (results[1].isNotEmpty) {
+        debugPrint("DEBUG: Primer completado ID: ${results[1][0]['id']}");
+      }
+
+      final pendientes = results[0];
+      final completadas = results[1];
+
+      debugPrint("DEBUG FULL DATA: $completadas");
+
+      List<Map<String, dynamic>> listaUnificada = [];
+
+      // A. Procesar Pendientes
+      listaUnificada.addAll(
+        pendientes.map((item) {
+          DateTime fechaParseada;
+          try {
+            // Los pendientes suelen venir en formato ISO: 2025-12-31...
+            fechaParseada = DateTime.parse(item["fecha"]).toLocal();
+          } catch (e) {
+            fechaParseada = DateTime.now();
+          }
+
+          return {
+            "id": item["id"],
+            "titulo": item["nombre"],
+            "categoria": item["categoria"] ?? "General",
+            "fecha": fechaParseada,
+            "isCompleted": false,
+          };
+        }),
+      );
+
+      // B. Procesar Completadas
+      listaUnificada.addAll(
+        completadas.map((item) {
+          DateTime fechaParseada;
+          try {
+            // Intentar formato humano: 30/12/2025, 9:09:49 p. m.
+            String rawFecha = item["fecha"]
+                .replaceAll('p. m.', 'PM')
+                .replaceAll('a. m.', 'AM')
+                .replaceAll('p.m.', 'PM')
+                .replaceAll('a.m.', 'AM');
+
+            fechaParseada = DateFormat("dd/MM/yyyy, h:mm:ss a").parse(rawFecha);
+          } catch (e) {
+            // Si falla, intentar como ISO por si acaso
+            try {
+              fechaParseada = DateTime.parse(item["fecha"]).toLocal();
+            } catch (e2) {
+              fechaParseada = DateTime.now();
+            }
+          }
+
+          return {
+            "id": item["id"],
+            "titulo": item["nombre"],
+            "categoria": item["categoria"] ?? "Finalizado",
+            "fecha": fechaParseada,
+            "isCompleted": true,
+          };
+        }),
+      );
+
+      setState(() {
+        tareas = listaUnificada;
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Error cargando KPIs: $e");
+      setState(() => isLoading = false);
+    }
   }
 
   Future<void> _markKpiAsDone(Map<String, dynamic> tarea) async {
+    debugPrint(
+      "DEBUG: Intentando marcar KPI: ${tarea['titulo']} con ID: ${tarea['id']}",
+    );
+
     final success = await _kpiService.markManualKpi(
       kpiId: tarea['id'],
       nombre: tarea['titulo'],
@@ -76,7 +148,9 @@ class _KpisScreenState extends State<KpisScreen> {
     );
 
     if (success) {
-      await _fetchPendingKpis(); // Recargar la lista
+      debugPrint("DEBUG: Éxito al marcar KPI en el servidor.");
+    } else {
+      debugPrint("DEBUG: Fallo al marcar KPI.");
     }
   }
 
@@ -110,6 +184,13 @@ class _KpisScreenState extends State<KpisScreen> {
         builder: (context, constraints) {
           final height = constraints.maxHeight;
           final width = constraints.maxWidth;
+
+          tareas.sort((a, b) {
+            bool aDone = a["isCompleted"] == true;
+            bool bDone = b["isCompleted"] == true;
+            if (aDone == bDone) return 0;
+            return aDone ? 1 : -1;
+          });
 
           // 🔹 Agrupar tareas por fecha
           Map<String, List<Map<String, dynamic>>> tareasPorFecha = {};
@@ -248,133 +329,155 @@ class _KpisScreenState extends State<KpisScreen> {
   // ============================================================
   Widget _cardTarea(Map<String, dynamic> tarea, double width, double height) {
     final DateTime fecha = tarea["fecha"];
-    bool completado = false;
+    final bool isCompleted = tarea["isCompleted"] == true;
 
     return StatefulBuilder(
       builder: (context, setStateSB) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-          margin: EdgeInsets.only(bottom: height * 0.015),
-          padding: EdgeInsets.symmetric(
-            horizontal: width * 0.03,
-            vertical: height * 0.02,
-          ),
-          decoration: BoxDecoration(
-            color:
-                completado
-                    ? const Color.fromARGB(90, 255, 255, 255)
-                    : const Color(0xFF303030),
-            borderRadius: BorderRadius.circular(width * 0.05),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    completado
-                        ? Colors.white.withOpacity(0.4)
-                        : Colors.black.withOpacity(0.25),
-                blurRadius: completado ? width * 0.045 : width * 0.03,
-                offset: Offset(0, height * 0.005),
-              ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ============= CHECKBOX =============
-              GestureDetector(
-                onTap: () {
-                  setStateSB(() => completado = true);
+        return AnimatedOpacity(
+          // NUEVO: Reduce opacidad si está completada para dar efecto "deshabilitado"
+          duration: const Duration(milliseconds: 500),
+          opacity: isCompleted ? 0.5 : 1.0,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+            margin: EdgeInsets.only(bottom: height * 0.015),
+            padding: EdgeInsets.symmetric(
+              horizontal: width * 0.03,
+              vertical: height * 0.02,
+            ),
+            decoration: BoxDecoration(
+              color:
+                  isCompleted
+                      ? const Color.fromARGB(90, 255, 255, 255)
+                      : const Color(0xFF303030),
+              borderRadius: BorderRadius.circular(width * 0.05),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      isCompleted
+                          ? Colors.white.withOpacity(0.4)
+                          : Colors.black.withOpacity(0.25),
+                  blurRadius: isCompleted ? width * 0.045 : width * 0.03,
+                  offset: Offset(0, height * 0.005),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ============= CHECKBOX =============
+                GestureDetector(
+                  onTap:
+                      isCompleted
+                          ? null // <--- PASO 1: Si ya está completada, el tap es nulo (bloqueado)
+                          : () {
+                            setStateSB(() {
+                              // Esto es solo para disparar la animación interna del checkbox
+                              // antes de que el padre reconstruya la lista.
+                            });
 
-                  // Llamada al Backend
-                  _markKpiAsDone(tarea);
+                            // Llamada al Backend
+                            _markKpiAsDone(tarea);
 
-                  Future.delayed(const Duration(milliseconds: 400), () {
-                    setState(() => tareas.remove(tarea));
-                  });
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOut,
-                  width: width * 0.08,
-                  height: width * 0.08,
-                  decoration: BoxDecoration(
-                    color:
-                        completado
-                            ? const Color.fromARGB(255, 252, 171, 171)
-                            : Colors.transparent,
-                    borderRadius: BorderRadius.circular(width * 0.018),
-                    border: Border.all(
-                      color: Colors.white,
-                      width: width * 0.006,
+                            Future.delayed(const Duration(milliseconds: 400), () {
+                              if (mounted) {
+                                setState(() {
+                                  // MARCADO COMO COMPLETADO EN LA LISTA PRINCIPAL
+                                  tarea["isCompleted"] = true;
+                                  // Al hacer setState, el build() correrá de nuevo y
+                                  // el sort() moverá esta tarea al final.
+                                });
+                              }
+                            });
+                          },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    width: width * 0.08,
+                    height: width * 0.08,
+                    decoration: BoxDecoration(
+                      color:
+                          isCompleted
+                              ? const Color.fromARGB(255, 252, 171, 171)
+                              : Colors.transparent,
+                      borderRadius: BorderRadius.circular(width * 0.018),
+                      border: Border.all(
+                        color: Colors.white,
+                        width: width * 0.006,
+                      ),
+                      boxShadow:
+                          isCompleted
+                              ? [
+                                BoxShadow(
+                                  color: const Color.fromARGB(
+                                    255,
+                                    255,
+                                    143,
+                                    176,
+                                  ).withOpacity(0.8),
+                                  blurRadius: width * 0.035,
+                                  spreadRadius: width * 0.008,
+                                ),
+                              ]
+                              : [],
                     ),
-                    boxShadow:
-                        completado
-                            ? [
-                              BoxShadow(
-                                color: const Color.fromARGB(
-                                  255,
-                                  255,
-                                  143,
-                                  176,
-                                ).withOpacity(0.8),
-                                blurRadius: width * 0.035,
-                                spreadRadius: width * 0.008,
-                              ),
-                            ]
-                            : [],
-                  ),
-                  child: Center(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: completado ? 1 : 0,
-                      child: AnimatedScale(
+                    child: Center(
+                      child: AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),
-                        scale: completado ? 1 : 0.6,
-                        child: Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: width * 0.045,
+                        opacity: isCompleted ? 1 : 0,
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 200),
+                          scale: isCompleted ? 1 : 0.6,
+                          child: Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: width * 0.045,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(width: width * 0.045),
-              // ================= TEXTOS =================
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tarea["titulo"],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.045,
-                        fontWeight: FontWeight.w700,
+                SizedBox(width: width * 0.045),
+                // ================= TEXTOS =================
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tarea["titulo"],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width * 0.045,
+                          fontWeight: FontWeight.w700,
+                          // Opcional: tachado si está completo
+                          decoration:
+                              isCompleted ? TextDecoration.lineThrough : null,
+                          decorationColor: Colors.white,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: height * 0.006),
-                    Text(
-                      "${_formatFecha(fecha)}  ${DateFormat("HH:mm").format(fecha)}",
-                      style: TextStyle(
-                        color: const Color(0xFFFF9BA9),
-                        fontSize: width * 0.036,
-                        fontWeight: FontWeight.w600,
+                      SizedBox(height: height * 0.006),
+                      Text(
+                        "${_formatFecha(fecha)}  ${DateFormat("HH:mm").format(fecha)}",
+                        style: TextStyle(
+                          color: const Color(0xFFFF9BA9),
+                          fontSize: width * 0.036,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: height * 0.006),
-                    Text(
-                      tarea["categoria"],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.04,
+                      SizedBox(height: height * 0.006),
+                      Text(
+                        tarea["categoria"],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width * 0.04,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

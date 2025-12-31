@@ -29,6 +29,8 @@ class _HomeLayoutState extends State<HomeLayout> {
   final GlobalKey previewKey = GlobalKey();
   ui.Image? screenImage;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -37,11 +39,11 @@ class _HomeLayoutState extends State<HomeLayout> {
 
     // Capturar la pantalla después de que el frame inicial se haya dibujado
     // y un pequeño retraso para asegurar que todo está renderizado.
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    /*WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Esperar un poco para asegurar que la UI está estable antes de capturar
       await Future.delayed(const Duration(milliseconds: 500));
-      if (mounted) captureScreen();
-    });
+      if (mounted) _captureAndOpenDrawer();
+    });*/
   }
 
   // Método para cargar el UID
@@ -54,7 +56,7 @@ class _HomeLayoutState extends State<HomeLayout> {
   }
 
   // Método para capturar la pantalla
-  Future<void> captureScreen() async {
+  /*Future<void> captureScreen() async {
     try {
       final boundary = previewKey.currentContext?.findRenderObject();
 
@@ -80,10 +82,39 @@ class _HomeLayoutState extends State<HomeLayout> {
     } catch (e) {
       // print("Error capturando pantalla: $e");
     }
+  }*/
+
+  Future<void> _captureAndOpenDrawer() async {
+    if (MediaQuery.of(context).viewInsets.bottom > 0) {
+      _scaffoldKey.currentState?.openDrawer();
+      return;
+    }
+
+    try {
+      RenderRepaintBoundary? boundary =
+          previewKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+
+      if (boundary != null) {
+        // Usamos un pixelRatio bajo (1.0) para que la captura sea instantánea y no pese
+        ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+        setState(() {
+          screenImage = image;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error capturando pantalla: $e");
+    }
+    // 3. Abrimos el drawer DESPUÉS de intentar la captura
+    _scaffoldKey.currentState?.openDrawer();
   }
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final bool isKeyboardOpen = keyboardHeight > 0;
+
     // 1. Mostrar un indicador de carga si aún no tenemos el UID
     if (_isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -100,13 +131,12 @@ class _HomeLayoutState extends State<HomeLayout> {
       );
     }
 
-    final bool isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
-
     // 3. Renderizar el layout principal
     return Scaffold(
+      key: _scaffoldKey,
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
-      appBar: CustomHomeAppBar(),
+      appBar: CustomHomeAppBar(onMenuPressed: _captureAndOpenDrawer),
       // Pasar la imagen capturada al Drawer
       drawer: AppDrawer(
         miniChild: currentChild,
@@ -120,34 +150,38 @@ class _HomeLayoutState extends State<HomeLayout> {
           Navigator.pop(context); // cerrar drawer
         },
       ),
-      body: Stack(
-        children: [
-          // Envolver el contenido (widget.child) en RepaintBoundary para la captura
-          RepaintBoundary(
-            key: previewKey,
-            child: Padding(
-              // El padding es para evitar posibles desbordamientos al capturar la imagen
-              padding: const EdgeInsets.only(bottom: 0),
-              child: widget.child,
+      body: SizedBox(
+        height: screenHeight,
+        width: MediaQuery.of(context).size.width,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: RepaintBoundary(
+                key: isKeyboardOpen ? null : previewKey,
+                child: widget.child,
+              ),
             ),
-          ),
 
-          Padding(
-            padding: const EdgeInsets.only(bottom: 0),
-            child: currentChild,
-          ),
+            Positioned.fill(
+              child: RepaintBoundary( 
+                child: currentChild,
+              ),
+            ),
 
-          if (!isKeyboardVisible)
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: AnimatedFloatingFooter(
-                initialIndex: widget.initialIndex ?? 0,
-                uid: _currentUid,
+              child: Offstage(
+                offstage: isKeyboardOpen, 
+                child: AnimatedFloatingFooter(
+                  initialIndex: widget.initialIndex ?? 0,
+                  uid: _currentUid,
+                ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

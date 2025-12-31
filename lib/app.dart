@@ -16,6 +16,8 @@ import 'features/sucursales/views/detalleSucursal.dart';
 
 import 'package:auth_company/features/kpis/views/kpis.dart';
 
+import 'features/horarios/views/horario.dart';
+
 class HomeApp extends StatelessWidget {
   const HomeApp({super.key});
 
@@ -49,6 +51,9 @@ class HomeApp extends StatelessWidget {
 
         AppRoutes.kpis: 
         (context) => const HomeLayout(child: KpisScreen(companyId: '', employeeId: '',)),
+
+        AppRoutes.horario: 
+        (context) => const HomeLayout(child: Horario()),
       },
     );
   }

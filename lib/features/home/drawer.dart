@@ -95,6 +95,11 @@ class AppDrawer extends StatelessWidget {
         "ruta": AppRoutes.registroScan, // Asumo esta ruta de ejemplo
       },
       {
+        "nombre": "Horario",
+        "asset": "lib/assets/images/Horario.svg",
+        "ruta": AppRoutes.horario, // Asumo esta ruta de ejemplo
+      },
+      {
         "nombre": "Zona",
         "asset": "lib/assets/images/Zona.svg",
         "ruta": AppRoutes.capas, // Asumo esta ruta de ejemplo
