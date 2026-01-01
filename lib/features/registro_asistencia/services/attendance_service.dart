@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:auth_company/config.dart';
+import 'package:path/path.dart';
 
 class AttendanceService {
   // Ajusta la IP a la de tu servidor (usa tu IP local si estás en emulador: 10.0.2.2)
@@ -117,40 +119,80 @@ class AttendanceService {
     }
   }
 
-
   /// Registro Manual
   Future<Map<String, dynamic>> registrarManual({
-    required String fecha, // YYYY-MM-DD
+    required String fecha,
     required String motivo,
+    File? imagen,
   }) async {
     final token = await _obtenerToken();
-    if (token.isEmpty) return {'success': false, 'message': 'Sin sesión activa'};
+    if (token.isEmpty) {
+      print('DEBUG: [Error] Token vacío en registrarManual');
+      return {'success': false, 'message': 'Sin sesión activa'};
+    }
 
     try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/register-manual'), 
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'fecha': fecha,
-          'motivo': motivo,
-        }),
+      print('DEBUG: --- Iniciando Registro Manual ---');
+      print('DEBUG: Fecha: $fecha');
+      print('DEBUG: Motivo: $motivo');
+
+      // 1. Configurar MultipartRequest
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$_baseUrl/register-manual'),
       );
 
-      print('--- MANUAL REGISTER ---');
-      print('Code: ${response.statusCode}');
-      print('Body: ${response.body}');
+      // 2. Headers
+      request.headers.addAll({'Authorization': 'Bearer $token'});
+      print('DEBUG: Headers configurados (Token presente)');
+
+      // 3. Campos de texto
+      request.fields['fecha'] = fecha;
+      request.fields['motivo'] = motivo;
+
+      // 4. Adjuntar Imagen con Debug
+      if (imagen != null) {
+        print('DEBUG: Imagen detectada. Ruta: ${imagen.path}');
+        final fileSize = await imagen.length();
+        print(
+          'DEBUG: Tamaño del archivo: ${(fileSize / 1024).toStringAsFixed(2)} KB',
+        );
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'file', // Cambiado a 'file' para que coincida con lo habitual en NestJS
+            imagen.path,
+            filename: basename(imagen.path),
+          ),
+        );
+        print('DEBUG: Archivo adjuntado al request exitosamente');
+      } else {
+        print('DEBUG: No se seleccionó ninguna imagen.');
+      }
+
+      // 5. Enviar petición
+      print('DEBUG: Enviando petición a: $_baseUrl/register-manual...');
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 30),
+      );
+
+      // 6. Procesar respuesta
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('DEBUG: --- RESPUESTA DEL SERVIDOR ---');
+      print('DEBUG: Status Code: ${response.statusCode}');
+      print('DEBUG: Body: ${response.body}');
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print('DEBUG: Registro exitoso: ${data['message']}');
         return {
           'success': true,
           'tipo': data['tipo'],
           'message': data['message'],
         };
       } else {
+        print('DEBUG: Error devuelto por el servidor');
         final data = jsonDecode(response.body);
         return {
           'success': false,
@@ -158,13 +200,31 @@ class AttendanceService {
         };
       }
     } catch (e) {
+      print('DEBUG: [Excepción] Error de conexión o proceso: $e');
       return {'success': false, 'message': 'Error de conexión: $e'};
     }
   }
 
-
-
-
+  Future<Map<String, dynamic>> registrarAsistenciaHuella({
+    required String companyId,
+    required String employeeId,
+    String? deviceId,
+  }) async {
+    final token = await _obtenerToken();
+    final response = await http.post(
+      Uri.parse('$attendanceUrl/register-biometric'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'companyId': companyId,
+        'employeeId': employeeId,
+        'deviceId': deviceId ?? 'flutter-app',
+      }),
+    );
+    return jsonDecode(response.body);
+  }
 
   Future<String> _obtenerToken() async {
     final prefs = await SharedPreferences.getInstance();

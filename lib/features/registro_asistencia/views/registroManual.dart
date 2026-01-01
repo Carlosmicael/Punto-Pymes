@@ -84,15 +84,20 @@ class _RegistroManualState extends State<RegistroManual> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(
-      source: source,
-      imageQuality: 70,
-    );
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality:
+            50, // Reducimos calidad para que suba más rápido a Firebase
+      );
 
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      print("Error capturando imagen: $e");
     }
   }
 
@@ -127,61 +132,85 @@ class _RegistroManualState extends State<RegistroManual> {
     );
   }
 
-  // LÓGICA PRINCIPAL DE REGISTRO
+// LÓGICA PRINCIPAL DE REGISTRO
   Future<void> _handleRegistro() async {
+    print('DEBUG: [UI] Iniciando _handleRegistro...');
+
     // 1. Validaciones básicas
     if (_fechaSeleccionada == null) {
+      print('DEBUG: [Validación] Falló: Fecha no seleccionada');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Debes seleccionar una fecha")),
       );
       return;
     }
+    
     if (_motivoController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Debes escribir un motivo")));
+      print('DEBUG: [Validación] Falló: Motivo vacío');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Debes escribir un motivo")),
+      );
       return;
     }
-    // Nota: Nombres, Apellidos y Sucursal son visuales/informativos si el backend usa el Token.
-    // Si la imagen fuera obligatoria, validar _imageFile != null aquí.
 
+    // Validación de imagen
+    if (_imageFile == null) {
+      print('DEBUG: [Validación] Falló: Sin imagen de evidencia');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, adjunta una foto como evidencia')),
+      );
+      return;
+    }
+
+    print('DEBUG: [UI] Validaciones aprobadas. Activando Loader.');
     setState(() => _isSaving = true);
 
-    // 2. Formatear fecha a YYYY-MM-DD
-    String fechaStr = DateFormat('yyyy-MM-dd').format(_fechaSeleccionada!);
+    try {
+      final fechaFormateada = DateFormat('yyyy-MM-dd').format(_fechaSeleccionada!);
+      
+      print('DEBUG: [Servicio] Llamando a registrarManual...');
+      print('DEBUG: [Datos Enviados] Fecha: $fechaFormateada, Motivo: ${_motivoController.text.trim()}, Path Imagen: ${_imageFile!.path}');
 
-    // 3. Llamar al servicio
-    final result = await _attendanceService.registrarManual(
-      fecha: fechaStr,
-      motivo: _motivoController.text.trim(),
-    );
-
-    setState(() => _isSaving = false);
-
-    // 4. Manejar respuesta usando el diálogo personalizado (ESTE ES EL CAMBIO)
-    if (!mounted) return; // Chequeo final después del await
-
-    if (result['success'] == true) {
-      // Éxito: Llamar al diálogo personalizado
-      _showCustomDialog(
-        isSuccess: true,
-        title: "Registro Exitoso",
-        message: result['message'] ?? "Su registro manual ha sido procesado.",
-      );
-    } else {
-      // Error: Llamar al diálogo personalizado (O puedes dejar el SnackBar si prefieres)
-      _showCustomDialog(
-        isSuccess: false,
-        title: "Error de Registro",
-        message: result['message'] ?? "Hubo un error al procesar la solicitud.",
+      // 2. Llamada al servicio
+      final resultado = await _attendanceService.registrarManual(
+        fecha: fechaFormateada,
+        motivo: _motivoController.text.trim(),
+        imagen: _imageFile,
       );
 
-      // Si prefieres el SnackBar para el error (como lo tenías antes, pero mejor usar el diálogo)
-      /*
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result['message']), backgroundColor: Colors.red),
-    );
-    */
+      print('DEBUG: [Servicio] Respuesta recibida: $resultado');
+
+      if (!mounted) {
+        print('DEBUG: [Context] El widget ya no está montado, abortando UI update.');
+        return;
+      }
+
+      // 3. Manejar respuesta usando tu diálogo personalizado
+      if (resultado['success'] == true) {
+        print('DEBUG: [UI] Mostrando diálogo de éxito');
+        _showCustomDialog(
+          isSuccess: true,
+          title: "Registro Exitoso",
+          message: resultado['message'] ?? "Su registro manual ha sido procesado.",
+        );
+      } else {
+        print('DEBUG: [UI] Mostrando diálogo de error');
+        _showCustomDialog(
+          isSuccess: false,
+          title: "Error de Registro",
+          message: resultado['message'] ?? "Hubo un error al procesar la solicitud.",
+        );
+      }
+    } catch (e) {
+      print('DEBUG: [Excepción] Error crítico en _handleRegistro: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error de red o proceso: $e')),
+        );
+      }
+    } finally {
+      print('DEBUG: [UI] Finalizando proceso. Desactivando Loader.');
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 

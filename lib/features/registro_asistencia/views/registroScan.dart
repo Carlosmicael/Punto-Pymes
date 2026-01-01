@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:auth_company/features/registro_asistencia/services/attendance_service.dart';
+import 'package:auth_company/features/user/services/user_service.dart';
+import 'package:auth_company/routes/app_routes.dart';
 
 class RegistroScanScreen extends StatefulWidget {
   const RegistroScanScreen({super.key});
@@ -9,37 +12,86 @@ class RegistroScanScreen extends StatefulWidget {
 }
 
 class _RegistroScanScreenState extends State<RegistroScanScreen> {
-  CameraController? _controller;
-  Future<void>? _initializeControllerFuture;
+  final LocalAuthentication auth = LocalAuthentication();
+  final AttendanceService attendanceService = AttendanceService();
+  final UserService userService = UserService();
 
-  @override
-  void initState() {
-    super.initState();
-    _initCamera();
+  bool _isAuth = false;
+  String _statusMessage = "";
+  StatusType _statusType = StatusType.info;
+
+  Future<void> _autenticarHuella() async {
+    print("DEBUG: Iniciando flujo biométrico...");
+    try {
+      final authenticated = await auth.authenticate(
+        localizedReason:
+            'Por favor, escanee su huella para registrar asistencia.',
+        biometricOnly: true,
+      );
+
+      print("DEBUG: Resultado authenticate = $authenticated");
+
+      if (authenticated) {
+        setState(() {
+          _isAuth = true;
+          _statusMessage = "Huella reconocida correctamente";
+          _statusType = StatusType.success;
+        });
+      } else {
+        setState(() {
+          _statusMessage = "Huella no reconocida";
+          _statusType = StatusType.error;
+        });
+      }
+    } catch (e) {
+      print("DEBUG: Excepción en authenticate -> $e");
+      setState(() {
+        _statusMessage = "Error en autenticación biométrica";
+        _statusType = StatusType.error;
+      });
+    }
   }
 
-  Future<void> _initCamera() async {
-    final cameras = await availableCameras();
+  Future<void> _enviarRegistro() async {
+    print("DEBUG: Preparando envío de registro biométrico...");
+    try {
+      final ids = await userService.getIdsForAttendance();
 
-    final backCamera = cameras.firstWhere(
-      (cam) => cam.lensDirection == CameraLensDirection.back,
-    );
+      if (ids == null) {
+        setState(() {
+          _statusMessage = "No se pudieron obtener los datos del usuario";
+          _statusType = StatusType.error;
+        });
+        return;
+      }
 
-    _controller = CameraController(
-      backCamera,
-      ResolutionPreset.low,
-      enableAudio: false,
-    );
+      final result = await attendanceService.registrarAsistenciaHuella(
+        companyId: ids['companyId']!,
+        employeeId: ids['employeeId']!,
+        deviceId: "flutter-app",
+      );
 
-    _initializeControllerFuture = _controller!.initialize();
+      print("DEBUG: Respuesta del backend -> $result");
 
-    if (mounted) setState(() {});
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
+      if (result['success'] == true) {
+        setState(() {
+          _statusMessage = result['message'] ?? "Registro exitoso";
+          _statusType = StatusType.success;
+        });
+      } else {
+        setState(() {
+          _statusMessage =
+              result['message'] ?? "Error al registrar asistencia";
+          _statusType = StatusType.error;
+        });
+      }
+    } catch (e) {
+      print("DEBUG: Excepción al enviar registro -> $e");
+      setState(() {
+        _statusMessage = "Error de conexión con el servidor";
+        _statusType = StatusType.error;
+      });
+    }
   }
 
   @override
@@ -47,104 +99,201 @@ class _RegistroScanScreenState extends State<RegistroScanScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final h = constraints.maxHeight;
-            final w = constraints.maxWidth;
+        child: Stack(
+          children: [
+            ScannerOverlay(
+              boxSizeFactor: 0.65,
+              offsetYFactor: -0.10,
+              borderThickness: 4,
+              cornerLength: 30,
+              overlayColor: Colors.black54,
+            ),
 
-            return Stack(
-              children: [
-                // PREVIEW REAL DE LA CÁMARA
-                FutureBuilder(
-                  future: _initializeControllerFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return CameraPreview(_controller!);
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      );
-                    }
-                  },
-                ),
+            SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
 
-                // OVERLAY PARA SCANNER (cuadro más arriba)
-                ScannerOverlay(
-                  boxSizeFactor: 0.65,
-                  offsetYFactor: -0.10, // ↩ Subido 10% hacia arriba
-                  borderThickness: 4,
-                  cornerLength: 30,
-                  overlayColor: Colors.black54,
-                ),
-
-                // Botón atrás
-                Positioned(
-                  top: 16,
-                  left: 16,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black38,
-                        borderRadius: BorderRadius.circular(50),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        margin: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
                       ),
-                      child: const Icon(Icons.arrow_back, color: Colors.white),
                     ),
                   ),
-                ),
 
-                // ==== BOTÓN REGISTRO MANUAL (DEBAJO DEL CUADRO) ====
-                Positioned(
-                  top: h * 0.62, // movido proporcional debajo del cuadro
-                  left: w * 0.14,
-                  right: w * 0.14,
-                  child: Container(
-                    height: 55,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF370B12), Color(0xFFE41335)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      borderRadius: BorderRadius.circular(50),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.45),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                  const SizedBox(height: 80),
+
+                  GestureDetector(
+                    onTap: _autenticarHuella,
+                    child: Icon(
+                      Icons.fingerprint,
+                      size: 120,
+                      color: _isAuth ? Colors.green : Colors.red,
                     ),
-                    child: Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            "Registro Manual",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            ),
+                  ),
+
+                  const SizedBox(height: 30), // 🔼 SUBIDO un poco
+
+                  if (_statusMessage.isNotEmpty)
+                    _StatusCard(
+                      message: _statusMessage,
+                      type: _statusType,
+                    )
+                  else
+                    const Text(
+                      "Toque el sensor para validar",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+
+                  const SizedBox(height: 56), // 🔽 más compacto
+
+                  if (_isAuth)
+                    ElevatedButton(
+                      onPressed: _enviarRegistro,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF370B12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 48,
+                        ),
+                      ),
+                      child: const Text(
+                        "Enviar Registro",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 80),
+
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, AppRoutes.registroManual);
+                    },
+                    child: Container(
+                      height: 55,
+                      margin: const EdgeInsets.symmetric(horizontal: 40),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF370B12), Color(0xFFE41335)],
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.45),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.edit, color: Colors.white),
                         ],
                       ),
+                      child: const Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Registro Manual",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.edit, color: Colors.white),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ====================== OVERLAY DEL SCANNER ========================== //
+/* ===================== STATUS CARD ===================== */
+
+enum StatusType { success, error, info }
+
+class _StatusCard extends StatelessWidget {
+  final String message;
+  final StatusType type;
+
+  const _StatusCard({
+    required this.message,
+    required this.type,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (type) {
+      StatusType.success => Colors.green,
+      StatusType.error => Colors.redAccent,
+      StatusType.info => Colors.blueAccent,
+    };
+
+    final icon = switch (type) {
+      StatusType.success => Icons.check_circle,
+      StatusType.error => Icons.error,
+      StatusType.info => Icons.info,
+    };
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 30),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.6)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* ===================== OVERLAY SCANNER ===================== */
 
 class ScannerOverlay extends StatelessWidget {
   final double boxSizeFactor;
@@ -168,18 +317,19 @@ class ScannerOverlay extends StatelessWidget {
       builder: (context, constraints) {
         final w = constraints.maxWidth;
         final h = constraints.maxHeight;
-
         final boxWidth = w * boxSizeFactor;
         final boxHeight = boxWidth;
-
-        final left = (w - boxWidth) / 2;
-        final top = (h - boxHeight) / 2 + (h * offsetYFactor);
 
         return IgnorePointer(
           child: CustomPaint(
             size: Size(w, h),
             painter: _ScannerPainter(
-              holeRect: Rect.fromLTWH(left, top, boxWidth, boxHeight),
+              holeRect: Rect.fromLTWH(
+                (w - boxWidth) / 2,
+                (h - boxHeight) / 2 + (h * offsetYFactor),
+                boxWidth,
+                boxHeight,
+              ),
               overlayColor: overlayColor,
               borderThickness: borderThickness,
               cornerLength: cornerLength,
@@ -206,64 +356,39 @@ class _ScannerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final overlayPaint = Paint()..color = overlayColor;
-
     canvas.saveLayer(Offset.zero & size, Paint());
-    canvas.drawRect(Offset.zero & size, overlayPaint);
-
-    final clearPaint = Paint()..blendMode = BlendMode.clear;
-    canvas.drawRect(holeRect, clearPaint);
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = overlayColor,
+    );
+    canvas.drawRect(
+      holeRect,
+      Paint()..blendMode = BlendMode.clear,
+    );
     canvas.restore();
 
-    final edgePaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1
-          ..color = Colors.white12;
-    canvas.drawRect(holeRect, edgePaint);
+    final cornerPaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = borderThickness
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    final cornerPaint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = borderThickness
-          ..strokeCap = StrokeCap.round
-          ..color = Colors.white;
-
-    final left = holeRect.left;
-    final top = holeRect.top;
-    final right = holeRect.right;
-    final bottom = holeRect.bottom;
+    final l = holeRect.left;
+    final t = holeRect.top;
+    final r = holeRect.right;
+    final b = holeRect.bottom;
     final c = cornerLength;
 
-    canvas.drawLine(Offset(left, top), Offset(left + c, top), cornerPaint);
-    canvas.drawLine(Offset(left, top), Offset(left, top + c), cornerPaint);
-
-    canvas.drawLine(Offset(right, top), Offset(right - c, top), cornerPaint);
-    canvas.drawLine(Offset(right, top), Offset(right, top + c), cornerPaint);
-
-    canvas.drawLine(
-      Offset(left, bottom),
-      Offset(left + c, bottom),
-      cornerPaint,
-    );
-    canvas.drawLine(
-      Offset(left, bottom),
-      Offset(left, bottom - c),
-      cornerPaint,
-    );
-
-    canvas.drawLine(
-      Offset(right, bottom),
-      Offset(right - c, bottom),
-      cornerPaint,
-    );
-    canvas.drawLine(
-      Offset(right, bottom),
-      Offset(right, bottom - c),
-      cornerPaint,
-    );
+    canvas.drawLine(Offset(l, t), Offset(l + c, t), cornerPaint);
+    canvas.drawLine(Offset(l, t), Offset(l, t + c), cornerPaint);
+    canvas.drawLine(Offset(r, t), Offset(r - c, t), cornerPaint);
+    canvas.drawLine(Offset(r, t), Offset(r, t + c), cornerPaint);
+    canvas.drawLine(Offset(l, b), Offset(l + c, b), cornerPaint);
+    canvas.drawLine(Offset(l, b), Offset(l, b - c), cornerPaint);
+    canvas.drawLine(Offset(r, b), Offset(r - c, b), cornerPaint);
+    canvas.drawLine(Offset(r, b), Offset(r, b - c), cornerPaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
