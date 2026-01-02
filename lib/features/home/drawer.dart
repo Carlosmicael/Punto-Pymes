@@ -87,7 +87,7 @@ class AppDrawer extends StatelessWidget {
       {
         "nombre": "Vacaciones",
         "asset": "lib/assets/images/Vacaciones.svg",
-        "ruta": AppRoutes.capas, // Asumo esta ruta de ejemplo
+        "ruta": AppRoutes.notificaciones, // Asumo esta ruta de ejemplo
       },
       {
         "nombre": "Registro Scan",
@@ -102,7 +102,7 @@ class AppDrawer extends StatelessWidget {
       {
         "nombre": "Zona",
         "asset": "lib/assets/images/Zona.svg",
-        "ruta": AppRoutes.capas, // Asumo esta ruta de ejemplo
+        "ruta": AppRoutes.notificaciones, // Asumo esta ruta de ejemplo
       },
       {
         "nombre": "Registro Sensor",

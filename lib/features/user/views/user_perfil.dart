@@ -66,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _telefonoCtrl.text = data['telefono'] ?? '';
       _cedulaCtrl.text = data['cedula'] ?? 'N/A';
       _correoCtrl.text = data['correo'] ?? 'N/A';
-      _fotoPerfilUrl = data['fotoPerfilUrl'] ?? '';
+      _fotoPerfilUrl = data['avatar'] ?? '';
       _selectedGender = data['genero'] ?? 'masculino';
 
       setState(() => _isLoading = false);
@@ -224,7 +224,7 @@ class _ProfileHeader extends StatelessWidget {
         : const AssetImage('assets/images/default_bg.png'); // Placeholder
     final ImageProvider avatarImage = avatarUrl.isNotEmpty
         ? NetworkImage(avatarUrl)
-        : const AssetImage('assets/icons/perfil.png'); // Placeholder
+        : const AssetImage('assets/images/perfil.png'); // Placeholder
 
     return Stack(
       clipBehavior: Clip.none,

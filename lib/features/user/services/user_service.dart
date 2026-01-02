@@ -15,36 +15,52 @@ class UserService {
   Future<Map<String, dynamic>?> getProfile(String uid, String token) async {
     try {
       final url = Uri.parse("$baseUrl/users/$uid");
-      final response = await http.get(url, headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token", 
-      });
+      print("➡️ [DEBUG] URL de la petición: $url");
+      print("➡️ [DEBUG] Token enviado: $token");
+
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("➡️ [DEBUG] Código de respuesta: ${response.statusCode}");
+      print("➡️ [DEBUG] Headers de respuesta: ${response.headers}");
+      print("➡️ [DEBUG] Body crudo: ${response.body}");
 
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final decoded = jsonDecode(response.body);
+        print("✅ [DEBUG] JSON decodificado: $decoded");
+        return decoded;
       } else {
-        // Manejo básico de error si el usuario no existe o hay un problema
-        print("Error al obtener perfil: ${response.statusCode}");
+        print("❌ [DEBUG] Error al obtener perfil: ${response.statusCode}");
         return null;
       }
-    } catch (e) {
-      print("Error de conexión al obtener perfil: $e");
+    } catch (e, stacktrace) {
+      print("⚠️ [DEBUG] Error de conexión al obtener perfil: $e");
+      print("⚠️ [DEBUG] Stacktrace: $stacktrace");
       return null;
     }
   }
 
   // --- 2. Método para actualizar datos del perfil (PATCH) ---
   /// Llama al endpoint PATCH /users/:uid
-  Future<bool> updateProfile(String uid, Map<String, dynamic> userData, String token) async {
+  Future<bool> updateProfile(
+    String uid,
+    Map<String, dynamic> userData,
+    String token,
+  ) async {
     try {
       final url = Uri.parse("$baseUrl/users/$uid");
 
       final response = await http.patch(
         url,
         headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token", 
-      },
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
         body: jsonEncode(userData),
       );
 
@@ -78,20 +94,23 @@ class UserService {
     final token = await _obtenerToken();
 
     if (uid.isEmpty || token.isEmpty) {
-        print('DEBUG: UID o Token vacíos. Retornando null.'); 
-        return null;
+      print('DEBUG: UID o Token vacíos. Retornando null.');
+      return null;
     }
 
     try {
       final url = Uri.parse("$baseUrl/users/$uid");
-      final response = await http.get(url, headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token", 
-      });
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
       if (response.statusCode == 200) {
         // ✅ La respuesta ahora contiene 'branchName'
-        return jsonDecode(response.body); 
+        return jsonDecode(response.body);
       } else {
         print("Error al obtener perfil: ${response.statusCode}");
         return null;
@@ -112,45 +131,45 @@ class UserService {
         'nombre': profileData['nombre'] as String? ?? 'N/A',
         'apellido': profileData['apellido'] as String? ?? 'N/A',
         // ✅ Campo que trae el nombre de la sucursal del backend
-        'sucursal': profileData['branchName'] as String? ?? 'Sin asignar', 
+        'sucursal': profileData['branchName'] as String? ?? 'Sin asignar',
       };
     }
 
     return null;
   }
-
-
 
   Future<Map<String, String>?> getIdsForAttendance() async {
-  final uid = await _obtenerUid();
-  final token = await _obtenerToken();
+    final uid = await _obtenerUid();
+    final token = await _obtenerToken();
 
-  if (uid.isEmpty || token.isEmpty) {
-    print('DEBUG: UID o Token vacíos. Retornando null.');
-    return null;
-  }
-
-  try {
-    final url = Uri.parse("$baseUrl/users/$uid");
-    final response = await http.get(url, headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
-    });
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return {
-        'companyId': data['empresaId'] as String? ?? '',
-        'employeeId': data['uid'] as String? ?? '',
-      };
-    } else {
-      print("Error al obtener perfil: ${response.statusCode}");
+    if (uid.isEmpty || token.isEmpty) {
+      print('DEBUG: UID o Token vacíos. Retornando null.');
       return null;
     }
-  } catch (e) {
-    print("Error de conexión al obtener perfil: $e");
-    return null;
-  }
-}
 
+    try {
+      final url = Uri.parse("$baseUrl/users/$uid");
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'companyId': data['empresaId'] as String? ?? '',
+          'employeeId': data['uid'] as String? ?? '',
+        };
+      } else {
+        print("Error al obtener perfil: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("Error de conexión al obtener perfil: $e");
+      return null;
+    }
+  }
 }

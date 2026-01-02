@@ -18,6 +18,8 @@ import 'package:auth_company/features/kpis/views/kpis.dart';
 
 import 'features/horarios/views/horario.dart';
 
+import 'package:auth_company/features/notificaciones/views/notificaciones.dart';
+
 class HomeApp extends StatelessWidget {
   const HomeApp({super.key});
 
@@ -54,6 +56,9 @@ class HomeApp extends StatelessWidget {
 
         AppRoutes.horario: 
         (context) => const HomeLayout(child: Horario()),
+
+        AppRoutes.notificaciones: 
+        (context) => const HomeLayout(child: HistorialNotificaciones()),
       },
     );
   }

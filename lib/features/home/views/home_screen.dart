@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:carousel_slider_plus/carousel_slider_plus.dart';
+
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:auth_company/features/notificaciones/services/notificaciones_service.dart';
 import 'package:auth_company/routes/app_routes.dart';
+
 
 // -------------------- AppBar personalizado --------------------
 class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -171,8 +176,51 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 // -------------------- Body --------------------
-class HomeBody extends StatelessWidget {
+class HomeBody extends StatefulWidget {
   const HomeBody({super.key});
+
+  @override
+  State<HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<HomeBody> {
+  final NotificacionesService _notifService = NotificacionesService();
+
+  List<Map<String, dynamic>> notificaciones = [];
+  bool loadingNotificaciones = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotificacionesParaCarrusel();
+  }
+
+  Future<void> _fetchNotificacionesParaCarrusel() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access_token') ?? '';
+
+      if (token.isEmpty) {
+        throw Exception('Token no disponible');
+      }
+
+      final data = await _notifService.getNotificaciones(token);
+
+      setState(() {
+        // Solo necesitamos imágenes para el carrusel
+        notificaciones =
+            data
+                .where((n) => n['imagen'] != null && n['imagen'] != '')
+                .toList();
+        loadingNotificaciones = false;
+      });
+    } catch (e) {
+      debugPrint('Error cargando notificaciones Home: $e');
+      setState(() {
+        loadingNotificaciones = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,28 +236,49 @@ class HomeBody extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(height: screenHeight * 0.38),
-          CarouselSlider(
-            items:
-                categorias1
-                    .map(
-                      (cat) => ClipRRect(
+          // ================== CARRUSEL DE NOTIFICACIONES ==================
+          if (loadingNotificaciones)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: CircularProgressIndicator(),
+            )
+          else if (notificaciones.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Text("Sin novedades"),
+            )
+          else
+            CarouselSlider(
+              items:
+                  notificaciones.map((notif) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, AppRoutes.notificaciones);
+                        // 👉 Si luego cambias el nombre:
+                        // AppRoutes.notificaciones
+                      },
+                      child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: Image.network(
-                          cat.imageUrl,
+                          notif['imagen'],
                           fit: BoxFit.cover,
                           width: double.infinity,
+                          errorBuilder:
+                              (_, __, ___) =>
+                                  const Center(child: Icon(Icons.error)),
                         ),
                       ),
-                    )
-                    .toList(),
-            controller: buttonCarouselController,
-            options: CarouselOptions(
-              autoPlay: true,
-              enlargeCenterPage: true,
-              viewportFraction: 0.85,
-              aspectRatio: 16 / 9,
+                    );
+                  }).toList(),
+              options: CarouselOptions(
+                autoPlay: true,
+                enlargeCenterPage: true,
+                viewportFraction: 0.85,
+                aspectRatio: 16 / 9,
+              ),
             ),
-          ),
+
+          // ===============================================================
           SizedBox(height: screenHeight * 0.03),
 
           // 🔹 Últimas asistencias
@@ -486,8 +555,8 @@ final List<Category> categorias1 = [
   ),
 ];
 
-final CarouselSliderController buttonCarouselController =
-    CarouselSliderController();
+/*final CarouselSliderController buttonCarouselController =
+    CarouselSliderController();*/
 
 final List<Map<String, String>> categorias = [
   {
@@ -498,22 +567,22 @@ final List<Map<String, String>> categorias = [
   {
     "nombre": "Calendar",
     "asset": "lib/assets/images/Calendar.svg",
-    "ruta": AppRoutes.capas,
+    "ruta": AppRoutes.notificaciones,
   },
   {
     "nombre": "Vacaciones",
     "asset": "lib/assets/images/Vacaciones.svg",
-    "ruta": AppRoutes.capas,
+    "ruta": AppRoutes.notificaciones,
   },
   {
     "nombre": "Horario",
     "asset": "lib/assets/images/Horario.svg",
-    "ruta": AppRoutes.capas,
+    "ruta": AppRoutes.notificaciones,
   },
   {
     "nombre": "Zona",
     "asset": "lib/assets/images/Zona.svg",
-    "ruta": AppRoutes.capas,
+    "ruta": AppRoutes.notificaciones,
   },
   {
     "nombre": "Registro Manual",
@@ -523,7 +592,7 @@ final List<Map<String, String>> categorias = [
   {
     "nombre": "Homework",
     "asset": "lib/assets/images/Homework.svg",
-    "ruta": AppRoutes.capas,
+    "ruta": AppRoutes.notificaciones,
   },
 ];
 

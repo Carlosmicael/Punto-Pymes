@@ -4,6 +4,8 @@ import 'package:auth_company/features/user/views/user_perfil.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 
+import 'package:auth_company/features/notificaciones/views/notificaciones.dart';
+
 class NavItem {
   final String label;
   final String iconPath;
@@ -14,7 +16,7 @@ class NavItem {
 final List<NavItem> _navItems = [
   NavItem('Home', 'lib/assets/icons/iconHome.png'),
   NavItem('User', 'lib/assets/icons/iconUser.png'),
-  NavItem('Capas', 'lib/assets/icons/iconCapas.png'),
+  NavItem('Notif', 'lib/assets/icons/iconCapas.png'),
 ];
 
 //esta funcion este widget nos devuelve la pantalla a donde queremos ir
@@ -31,6 +33,8 @@ Widget _getScreenWidget(String routeName, String? uid) {
       }
       // Pasar el argumento requerido 'uid'
       return ProfileScreen(uid: uid);
+    case AppRoutes.notificaciones:
+      return HistorialNotificaciones();  
     // Agrega Capas
     // case AppRoutes.capas:
     //   return const CapasScreen();
@@ -43,7 +47,7 @@ Widget _getScreenWidget(String routeName, String? uid) {
 final List<String> _navItemsRoutes = [
   AppRoutes.home,
   AppRoutes.profile,
-  AppRoutes.capas,
+  AppRoutes.notificaciones,
 ];
 
 class AnimatedFloatingFooter extends StatefulWidget {

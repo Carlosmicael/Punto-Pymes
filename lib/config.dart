@@ -23,3 +23,7 @@ String kpisUrl = "$baseUrll/$kpisPath";
 /// URL base para horarios
 const String horariosPath = "horarios";
 String horariosUrl = "$baseUrll/$horariosPath";
+
+/// URL base para notificaciones
+const String notificacionesPath = "notificaciones";
+String notificacionesUrl = "$baseUrll/$notificacionesPath"; 

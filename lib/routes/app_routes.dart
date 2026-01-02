@@ -5,7 +5,7 @@ class AppRoutes {
   static const home = '/home';
   static const splashWelcome = '/splash-welcome';
   static const profile = '/profile';
-  static const capas = '/capas';
+  //static const capas = '/capas';
 
 //  static const userPerfil = '/userPerfil';
   static const registroExitoso = '/registroExitoso';
@@ -19,4 +19,6 @@ class AppRoutes {
   static const kpis = '/kpis';
 
   static const horario = '/horario';
+
+  static const notificaciones = '/notificaciones'; 
 }
