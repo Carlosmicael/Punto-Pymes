@@ -21,4 +21,8 @@ class AppRoutes {
   static const horario = '/horario';
 
   static const notificaciones = '/notificaciones'; 
+
+  static const solicitudes = '/solicitudes';
+  static const solicitudes2 = '/solicitudes2';
+  static const solicitudes3 = '/solicitudes3';
 }

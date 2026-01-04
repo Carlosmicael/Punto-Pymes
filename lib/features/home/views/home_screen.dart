@@ -565,9 +565,9 @@ final List<Map<String, String>> categorias = [
     "ruta": AppRoutes.sucursal,
   },
   {
-    "nombre": "Calendar",
+    "nombre": "Solicitudes",
     "asset": "lib/assets/images/Calendar.svg",
-    "ruta": AppRoutes.notificaciones,
+    "ruta": AppRoutes.solicitudes,
   },
   {
     "nombre": "Vacaciones",

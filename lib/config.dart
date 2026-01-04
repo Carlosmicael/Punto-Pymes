@@ -1,5 +1,5 @@
 /// Dirección IP del backend 
-const String serverIp = "192.168.1.122";
+const String serverIp = "192.168.1.7";
 
 /// Puerto del backend principal (NestJS)
 const int serverPort = 3000;

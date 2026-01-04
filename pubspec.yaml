@@ -52,6 +52,7 @@ dependencies:
   fan_carousel_image_slider: ^1.3.0
   local_auth: ^3.0.0
   carousel_slider: ^5.1.1
+  file_picker: ^10.3.8
 
 dev_dependencies:
   flutter_test:
