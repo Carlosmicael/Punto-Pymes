@@ -16,18 +16,23 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
 
-  // Lógica de Estado
   final AttendanceService _apiService = AttendanceService();
-  bool _isLoading = true;
+
+  bool _isLoading = false; // Cambiado a false para mostrar botón "Iniciar"
   bool _isSuccess = false;
-  String _title = "Procesando...";
-  String _message = "Obteniendo ubicación y validando...";
+  String _title = "Registro de Asistencia";
+  String _message = "Presiona el botón para registrar tu entrada o salida";
   Color _statusColor = Colors.grey;
+
+  // Candados locales para esta instancia de pantalla
+  bool _responseProcessed = false;
+  bool _requestInFlight = false;
+  bool _dayCompleted = false; // Nuevo estado para cuando ambos registros existen
 
   @override
   void initState() {
     super.initState();
-    // Configuración de animación original
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
@@ -40,51 +45,73 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
 
     _controller.forward();
 
-    // INICIAR EL PROCESO AUTOMÁTICO
-    _registerAttendance();
+    // Ya no iniciamos el proceso automáticamente
+    // El usuario decidirá cuándo presionar el botón "Iniciar"
   }
 
-  /// Función principal de lógica
   Future<void> _registerAttendance() async {
+    // Prevent multiple simultaneous requests
+    if (_requestInFlight || _responseProcessed) {
+      print(
+        '⚠️ Petición ignorada: Ya hay una solicitud en proceso o ya fue procesada',
+      );
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _requestInFlight = true;
+      });
+    }
+
     try {
-      // 1. Obtener Ubicación (Puede lanzar una excepción por GPS o Permisos)
+      // Small delay to show loading animation
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      print('🔍 Obteniendo ubicación del dispositivo...');
       final position = await LocationHandler.obtenerPosicionActual();
 
-      // -----------------------------------------------------------------
-      // ✅ UBICACIÓN
-      // -----------------------------------------------------------------
-      print('--- UBICACIÓN DEL DISPOSITIVO ---');
-      print('Latitud: ${position.latitude}');
-      print('Longitud: ${position.longitude}');
-      print('Precisión (m): ${position.accuracy}');
-      print('---------------------------------');
-      // -----------------------------------------------------------------
+      // Debug information
+      print('📍 Ubicación obtenida:');
+      print('   - Latitud: ${position.latitude}');
+      print('   - Longitud: ${position.longitude}');
+      print('   - Precisión: ${position.accuracy} metros');
 
-      // 2. Llamar al Servicio
+      print('🚀 Enviando petición al servidor...');
       final result = await _apiService.registrarAsistencia(
         position.latitude,
         position.longitude,
       );
 
-      // 3. Manejo de Respuesta del Backend
-      if (result['success'] == true) {
-        _handleSuccess(result);
-      } else {
-        _handleFailure(result);
+      if (mounted) {
+        // Manejar el caso de petición en progreso
+        if (result['errorType'] == 'RequestInProgress') {
+          print('⚠️ Petición en progreso detectada, ignorando...');
+          setState(() {
+            _isLoading = false;
+            _requestInFlight = false;
+          });
+          return;
+        }
+        
+        if (result['success'] == true) {
+          _responseProcessed = true;
+          print('✅ Registro exitoso: ${result['message']}');
+          _handleSuccess(result);
+        } else {
+          print('❌ Error en el registro: ${result['message']}');
+          _handleFailure(result);
+        }
       }
     } catch (e) {
-      // 4. Manejo de Errores Críticos (GPS, Permisos)
-
-      // 🚨 Imprimir el error completo antes de clasificarlo
-      print('--- ERROR CRÍTICO CAPTURADO ---');
-      print('Excepción completa: $e'); // ✅ IMPRIME LA EXCEPCIÓN COMPLETA AQUÍ
-      print('------------------------------');
-
-      _handleCriticalError(e.toString());
+      print('🔥 Error crítico: $e');
+      if (mounted) _handleCriticalError(e.toString());
     } finally {
       if (mounted) {
         setState(() {
           _isLoading = false;
+          _requestInFlight = false;
         });
       }
     }
@@ -92,37 +119,34 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
 
   /// Maneja los casos de éxito, incluyendo 'atraso' y 'salida anticipada'.
   void _handleSuccess(Map<String, dynamic> result) {
-    String tipo = result['tipo'] as String;
-    String estado = result['estado'] as String;
-    String hora = result['hora'] as String;
+    final tipo = (result['tipo'] ?? '').toString();
+    final estado = (result['estado'] ?? '').toString();
+    final hora = (result['hora'] ?? '').toString();
 
     setState(() {
+      _isLoading = false; // Asegurar que se detenga la animación de carga
       _isSuccess = true;
-      _statusColor = Colors.green.shade700; // Color por defecto
+      _statusColor = Colors.green.shade700;
 
       if (tipo == 'entrada') {
-        _title = "¡Registro de Entrada Exitoso!";
-
+        _title = "¡Entrada Registrada!";
         if (estado == 'atraso') {
           _message =
-              "Tu entrada a las **$hora** fue registrada con **atraso**. Por favor, revisa tu horario.";
-          _statusColor = Colors.orange.shade700; // Advertencia
+              "Tu entrada ha sido registrada a las $hora con retraso. Por favor, revisa tu horario.";
+          _statusColor = Colors.orange.shade700;
         } else {
-          // estado 'válido'
           _message =
-              "Tu entrada ha sido registrada correctamente a las **$hora**.";
+              "Tu entrada ha sido registrada correctamente a las $hora.";
         }
       } else if (tipo == 'salida') {
-        _title = "¡Registro de Salida Exitoso!";
-
+        _title = "¡Salida Registrada!";
         if (estado == 'salida anticipada') {
           _message =
-              "Tu salida a las **$hora** fue registrada como **anticipada**. Consulta con tu supervisor.";
-          _statusColor = Colors.orange.shade700; // Advertencia
+              "Tu salida ha sido registrada a las $hora como anticipada. Consulta con tu supervisor.";
+          _statusColor = Colors.orange.shade700;
         } else {
-          // estado 'válido'
           _message =
-              "Tu salida ha sido registrada correctamente a las **$hora**.";
+              "Tu salida ha sido registrada correctamente a las $hora.";
         }
       }
     });
@@ -131,37 +155,69 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
   /// Maneja los fallos lógicos del servidor (fuera de rango, ya registrado, etc.).
   void _handleFailure(Map<String, dynamic> result) {
     setState(() {
+      _isLoading = false; // Asegurar que se detenga la animación de carga
       _isSuccess = false;
-      _statusColor = Colors.red.shade700; // Color por defecto de error
+      _statusColor = Colors.red.shade700;
       _title = "Fallo en el Registro";
 
-      String errorMessage =
-          result['message'] as String; // Mensaje de la excepción NestJS
+      final errorMessage = (result['message'] ?? 'Error desconocido').toString().toLowerCase(); // Convertimos a minúsculas para comparar mejor
+      final statusCode = int.tryParse(result['statusCode']?.toString() ?? '');
+      final errorType = (result['errorType'] ?? '').toString();
 
-      if (errorMessage.contains('fuera de rango')) {
-        _message =
-            "No pudimos registrar tu asistencia. Estás **fuera del rango geográfico** de la sucursal asignada.";
-      } else if (errorMessage.contains('día laboral')) {
-        _message =
-            "Hoy no es un día laboral según tu jornada asignada. Contacta a RRHH si es un error.";
-      } else if (errorMessage.contains('Ya tienes entrada y salida')) {
-        _message =
-            "Ya tienes un registro de entrada y salida para el día de hoy. Día completado.";
-        _statusColor = Colors.blue.shade700; // Aviso informativo
-        _title = "Aviso Importante";
-      } else if (errorMessage.contains('Ya existe una entrada')) {
-        _message =
-            "Ya tienes un registro de **entrada** para el día de hoy. Intenta registrar tu **salida**.";
-        _title = "Aviso: Entrada Duplicada";
-      } else {
-        _message = "Ocurrió un error inesperado: $errorMessage";
+      // PRIORIDAD 1: Fuera de rango geográfico (Debe ir primero)
+      if (errorMessage.contains('fuera de rango') || errorMessage.contains('distancia')) {
+        _title = "Fuera de Rango";
+        
+        final distanceMatch = RegExp(r'([\d.]+)m').firstMatch(errorMessage);
+        final distance = distanceMatch?.group(1) ?? 'más';
+        
+        _message = "Te encuentras a $distance metros de la sucursal. Acércate más para registrar tu asistencia.";
+        _statusColor = Colors.orange.shade700;
+        // No marcamos como _responseProcessed para que muestre "Reintentar" y permita volver a intentar
+        return;
       }
+
+      // PRIORIDAD 2: Duplicados (409 Conflict)
+      if (statusCode == 409 || errorType == 'Conflict') {
+        if (errorMessage.contains('entrada')) {
+          _title = "Aviso: Entrada Ya Registrada";
+          _message = "Ya registraste tu entrada hoy. No olvides registrar tu salida al terminar.";
+          _statusColor = Colors.blue.shade700;
+        } else if (errorMessage.contains('salida')) {
+          _title = "Aviso: Salida Ya Registrada";
+          _message = "Ya has registrado tu salida anteriormente.";
+          _statusColor = Colors.blue.shade700;
+        }
+        return;
+      }
+
+      // PRIORIDAD 3: Jornada completada (403 Forbidden o mensajes específicos)
+      // Buscamos la frase completa para evitar falsos positivos
+      if (statusCode == 403 || 
+          errorMessage.contains('jornada completa') || 
+          errorMessage.contains('ya tienes entrada y salida')) {
+        _dayCompleted = true; 
+        _title = "Jornada Completada";
+        _statusColor = Colors.blue.shade700;
+        _message = "Has completado tus registros de hoy. ¡Buen trabajo!";
+        return;
+      }
+
+      // Otros casos...
+      if (errorMessage.contains('día laboral')) {
+        _message = "Hoy no es un día laboral según tu jornada.";
+        _statusColor = Colors.orange.shade700;
+        return;
+      }
+
+      _message = "Error: ${result['message']}";
     });
   }
 
   /// Maneja los errores antes de la comunicación con el servidor (GPS, Permisos).
   void _handleCriticalError(String error) {
     setState(() {
+      _isLoading = false; // Asegurar que se detenga la animación de carga
       _isSuccess = false;
       _statusColor = Colors.red.shade700;
       _title = "Error Crítico";
@@ -200,7 +256,6 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
     final double bigIcon = size.width * 0.1;
     final double whiteBoxHeight = size.height * 0.75;
     final double buttonVertical = size.height * 0.015;
-    final double buttonHorizontal = size.width * 0.15;
     final double smallCircle = size.width * 0.080;
     final double svgSize = size.width * 0.020;
     final double titleFont = size.width * 0.055;
@@ -230,7 +285,7 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: size.width * 0.1),
                   child: Text(
-                    "Automatico",
+                    "Registro GPS",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: size.width * 0.037,
@@ -346,10 +401,13 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
                                           _isLoading
                                               ? null // Deshabilita el toque mientras carga
                                               : () {
-                                                if (_isSuccess) {
-                                                  // LÓGICA: En éxito, simplemente cerrar la pantalla
-                                                  Navigator.of(context).pop();
-                                                } else {
+                                                if (_isSuccess || _dayCompleted) {
+                                                  // LÓGICA: En éxito o jornada completada, redirigir a pantalla principal
+                                                  Navigator.pushReplacementNamed(
+                                                    context,
+                                                    '/home', // Ruta a HomeLayout/HomeScreen
+                                                  );
+                                                } else if (_responseProcessed) {
                                                   // LÓGICA: En error, reintentar (Restablecer el estado y llamar a _registerAttendance)
                                                   setState(() {
                                                     _isLoading = true;
@@ -359,8 +417,18 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
                                                     _statusColor = Colors.grey;
                                                   });
                                                   _registerAttendance();
+                                                } else {
+                                                  // LÓGICA: Primer intento - Iniciar registro
+                                                  setState(() {
+                                                    _isLoading = true;
+                                                    _title = "Procesando...";
+                                                    _message =
+                                                        "Obteniendo ubicación y validando...";
+                                                    _statusColor = Colors.grey;
+                                                  });
+                                                  _registerAttendance();
                                                 }
-                                              }, // Cerrar al aceptar
+                                              }, // Iniciar, Salir, Redirigir o reintentar
                                       child: Container(
                                         // ... (Estilos originales botón negro) ...
                                         padding: EdgeInsets.symmetric(
@@ -386,7 +454,13 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
                                               MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              "Aceptar",
+                                              _isSuccess 
+                                                  ? "Aceptar" 
+                                                  : _dayCompleted
+                                                      ? "Salir"
+                                                      : _responseProcessed 
+                                                          ? "Reintentar" 
+                                                          : "Iniciar",
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: bodyFont * 1.15,
@@ -422,48 +496,6 @@ class _RegistroExitosoScreenState extends State<RegistroExitosoScreen>
                                   ),
 
                                   SizedBox(height: size.height * 0.02),
-
-                                  // Si hay error, podríamos cambiar este botón a "Reintentar"
-                                  if (!_isSuccess && !_isLoading)
-                                    GestureDetector(
-                                      onTap: _registerAttendance,
-                                      child: SizedBox(
-                                        width: size.width * 0.55,
-                                        child: Container(
-                                          // ... (Estilos botón blanco borde negro) ...
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: buttonVertical,
-                                            horizontal: buttonHorizontal,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              50,
-                                            ),
-                                            border: Border.all(
-                                              color: Colors.black,
-                                              width: 2,
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              // LÓGICA: Mostrar estado de carga, ACEPTAR si es éxito, REINTENTAR si es error
-                                              _isLoading
-                                                  ? "PROCESANDO"
-                                                  : _isSuccess
-                                                  ? "ACEPTAR"
-                                                  : "REINTENTAR",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: bodyFont * 1.2,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 2.5,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
                                 ],
                               ),
                             ),

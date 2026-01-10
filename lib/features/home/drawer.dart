@@ -4,8 +4,8 @@ import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Necesario para SvgPicture
 
-import 'package:auth_company/features/user/services/user_service.dart'; 
-import 'package:auth_company/features/kpis/views/kpis.dart';           
+import 'package:auth_company/features/user/services/user_service.dart';
+import 'package:auth_company/features/kpis/views/kpis.dart';
 
 class AppDrawer extends StatelessWidget {
   // 1. PROPIEDADES ACTUALIZADAS (Tomadas del drawer.dart original)
@@ -15,20 +15,17 @@ class AppDrawer extends StatelessWidget {
   // Se remueve 'this.screenImage'
   const AppDrawer({super.key, this.miniChild, this.onMiniaturaSelected});
 
-
-
-
-
-
   // 2. Función interna para manejar la navegación de KPIs
   Future<void> _navigateToKpis(BuildContext context) async {
     final userService = UserService();
-    
+
     // Mostrar indicador de carga
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator(color: Colors.red)),
+      builder:
+          (context) =>
+              const Center(child: CircularProgressIndicator(color: Colors.red)),
     );
 
     final perfil = await userService.getProfileRegistroManual();
@@ -41,20 +38,17 @@ class AppDrawer extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => HomeLayout(
-            child: KpisScreen(
-              companyId: perfil['empresaId'] ?? '',
-              employeeId: perfil['uid'] ?? '',
-            ),
-          ),
+          builder:
+              (context) => HomeLayout(
+                child: KpisScreen(
+                  companyId: perfil['empresaId'] ?? '',
+                  employeeId: perfil['uid'] ?? '',
+                ),
+              ),
         ),
       );
     }
   }
-
-
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +104,11 @@ class AppDrawer extends StatelessWidget {
         "ruta": AppRoutes.registroExitoso, // Asumo esta ruta de ejemplo
       },
 
-      {"nombre": "KPIs", "asset": "lib/assets/images/Homework.svg", "ruta": "special_kpi"},
+      {
+        "nombre": "KPIs",
+        "asset": "lib/assets/images/Homework.svg",
+        "ruta": "special_kpi",
+      },
     ];
 
     return Drawer(
@@ -204,123 +202,129 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 20, right: 0),
-                      child: Row(
-                        children: [
-                          // ───────── Columna de Menú (SVG + Texto) ─────────
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 20, right: 0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Lista de categorías
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: categorias.map((item) {
-                                        final bool isSelected = item['ruta'] == currentRoute;
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 0),
+                    child: Row(
+                      children: [
+                        // ───────── Columna de Menú (SVG + Texto) ─────────
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20, right: 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Lista de categorías
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children:
+                                        categorias.map((item) {
+                                          final bool isSelected =
+                                              item['ruta'] == currentRoute;
 
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(vertical: 15),
-                                          child: InkWell(
-                                            onTap: () {
-                                              // --- LÓGICA DE NAVEGACIÓN MODIFICADA ---
-                                              if (item['nombre'] == "KPIs") {
-                                                _navigateToKpis(context);
-                                              } else {
-                                                Navigator.pop(context); // Cierra el drawer
-                                                Navigator.pushNamed(
-                                                  context,
-                                                  item['ruta']!,
-                                                );
-                                              }
-                                            },
-                                            child: Row(
-                                              children: [
-                                                // Punto indicador de ruta actual
-                                                if (isSelected)
-                                                  Container(
-                                                    width: 8,
-                                                    height: 8,
-                                                    margin: const EdgeInsets.only(right: 8),
-                                                    decoration: const BoxDecoration(
-                                                      color: Colors.white,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  )
-                                                else
-                                                  const SizedBox(width: 8),
-
-                                                const SizedBox(width: 15),
-                                                
-                                                // SVG del menú
-                                                SvgPicture.asset(
-                                                  item['asset']!,
-                                                  width: MediaQuery.of(context).size.width * 0.05,
-                                                  height: MediaQuery.of(context).size.width * 0.05,
-                                                  colorFilter: const ColorFilter.mode(
-                                                    Colors.white,
-                                                    BlendMode.srcIn,
-                                                  ),
-                                                ),
-                                                
-                                                const SizedBox(width: 15),
-
-                                                // Texto del menú
-                                                Flexible(
-                                                  child: Text(
-                                                    item['nombre']!,
-                                                    style: TextStyle(
-                                                      fontSize: MediaQuery.of(context).size.width * 0.035,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 15,
                                             ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
+                                            child: InkWell(
+                                              onTap: () {
+                                                // --- LÓGICA DE NAVEGACIÓN ---
+                                                if (item['nombre'] == "KPIs") {
+                                                  // Para KPIs llamamos a su función especial
+                                                  _navigateToKpis(context);
+                                                } else if (item['nombre'] ==
+                                                        "Registro Sensor" ||
+                                                    item['ruta'] ==
+                                                        AppRoutes
+                                                            .registroExitoso) {
+                                                  Navigator.pop(context);
+                                                  // 2. Usamos pushReplacementNamed para el Registro.
+                                                  // Esto es vital: si el usuario ya estaba en la pantalla de registro,
+                                                  // la reemplaza en lugar de poner una encima de otra.
+                                                  Navigator.pushReplacementNamed(
+                                                    context,
+                                                    item['ruta']!,
+                                                  );
+                                                } else {
+                                                  // 3. Navegación normal para el resto de items (Perfil, etc.)
+                                                  // Solo hacemos el push porque el pop ya se ejecutó al inicio.
+                                                  Navigator.pushNamed(
+                                                    context,
+                                                    item['ruta']!,
+                                                  );
+                                                }
+                                              },
+                                              child: Row(
+                                                children: [
+                                                  // Punto indicador de ruta actual
+                                                  if (isSelected)
+                                                    Container(
+                                                      width: 8,
+                                                      height: 8,
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                            right: 8,
+                                                          ),
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                    )
+                                                  else
+                                                    const SizedBox(width: 8),
+
+                                                  const SizedBox(width: 15),
+
+                                                  // SVG del menú
+                                                  SvgPicture.asset(
+                                                    item['asset']!,
+                                                    width:
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width *
+                                                        0.05,
+                                                    height:
+                                                        MediaQuery.of(
+                                                          context,
+                                                        ).size.width *
+                                                        0.05,
+                                                    colorFilter:
+                                                        const ColorFilter.mode(
+                                                          Colors.white,
+                                                          BlendMode.srcIn,
+                                                        ),
+                                                  ),
+
+                                                  const SizedBox(width: 15),
+
+                                                  // Texto del menú
+                                                  Flexible(
+                                                    child: Text(
+                                                      item['nombre']!,
+                                                      style: TextStyle(
+                                                        fontSize:
+                                                            MediaQuery.of(
+                                                              context,
+                                                            ).size.width *
+                                                            0.035,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
                                   ),
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                                ),
 
                                 // ───────── Opción de Cerrar Sesión (con lógica funcional) ─────────
                                 InkWell(

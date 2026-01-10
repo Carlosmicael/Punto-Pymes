@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:auth_company/config.dart';
@@ -8,78 +9,125 @@ import 'package:path/path.dart';
 class AttendanceService {
   // Ajusta la IP a la de tu servidor (usa tu IP local si estás en emulador: 10.0.2.2)
   final String _baseUrl = attendanceUrl;
+  
+  // Control de peticiones para evitar duplicados
+  static bool _requestInProgress = false;
 
   /// Envía la ubicación al backend para registrar entrada/salida
   Future<Map<String, dynamic>> registrarAsistencia(
     double lat,
     double lng,
   ) async {
-    final token = await _obtenerToken();
-
-    print('Token enviado: $token');
-    if (token.isEmpty) {
-      print('ALERTA: Token vacío. Asegúrate de iniciar sesión primero.');
+    // Evitar múltiples peticiones simultáneas
+    if (_requestInProgress) {
+      print('⚠️ [AttendanceService] Petición ignorada: Ya hay una solicitud en progreso');
+      return {
+        'success': false,
+        'message': 'Petición en progreso, por favor espere',
+        'errorType': 'RequestInProgress',
+        'statusCode': 429,
+      };
     }
 
-    final response = await http.post(
-      Uri.parse('$_baseUrl/register'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({'lat': lat, 'lng': lng}),
-    );
+    _requestInProgress = true;
+    print('🚀 [AttendanceService] Iniciando nueva petición de asistencia');
 
-    // Imprimir el código de estado y el cuerpo de la respuesta
+    try {
+      final token = await _obtenerToken();
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/register'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'lat': lat, 'lng': lng}),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw TimeoutException('La petición tardó demasiado tiempo');
+        },
+      );
+
     print('--- RESPUESTA DEL SERVICIO ---');
-    print(
-      'URL de intento: $_baseUrl/register',
-    ); // ✅ Añade esto para verificar la IP
     print('Status code: ${response.statusCode}');
     print('Cuerpo: ${response.body}');
     print('----------------------------');
 
-    // -------------------------------------------------------------
-    // ✅ Ejecutar jsonDecode solo si hay cuerpo
-    // -------------------------------------------------------------
+    // 1. Validar cuerpo vacío
     if (response.body.isEmpty) {
-      // Si el servidor retorna 201 sin contenido, lo tratamos como éxito simple.
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return {
-          'success': true,
-          'message': 'Registro exitoso (sin detalles adicionales).',
-          'tipo': 'desconocido',
-          'hora': 'N/A',
-          'estado': 'válido',
-        };
-      }
-      // Si el código es 401/403/500 y está vacío, damos un error genérico.
-      throw const FormatException(
-        'El servidor devolvió un cuerpo vacío y un código de error.',
-      );
-    }
-
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      // Manejo de Respuesta Exitosa
-      return {
-        'success': true,
-        'tipo': data['tipo'], // 'entrada' o 'salida'
-        'hora': data['hora'], // hora del registro
-        'estado': data['estado'], // 'válido', 'atraso', 'salida anticipada'
-        'message': 'Registro de ${data['tipo']} exitoso',
-      };
-    } else {
-      // Manejo de Errores (4xx, 5xx)
-      // data contendrá { statusCode, message, error } de NestJS/Exceptions
       return {
         'success': false,
-        'message':
-            data['message'] ??
-            'Error desconocido en el servidor.', // Captura el mensaje de la excepción (ej. "Fuera de rango")
-        'errorType': data['error'] ?? 'Error de Servidor',
+        'message': 'El servidor devolvió un cuerpo vacío.',
+        'errorType': 'EmptyBody',
+        'statusCode': response.statusCode,
       };
+    }
+
+    // 2. Intentar parsear JSON
+    Map<String, dynamic> data;
+    try {
+      data = jsonDecode(response.body);
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Respuesta no válida del servidor.',
+        'errorType': 'InvalidJSON',
+        'statusCode': response.statusCode,
+      };
+    }
+
+    // 3. Verificar Éxito (CORRECCIÓN PRINCIPAL AQUÍ)
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      // AUNQUE SEA 200/201, VERIFICAMOS SI EL BACKEND DIJO 'success': false
+      if (data['success'] == false) {
+        return {
+          'success': false, // Marcamos como fallo para que la UI lo detecte
+          'message': data['message'] ?? 'Error lógico del servidor',
+          'errorType': data['error'] ?? 'Conflict',
+          'statusCode':
+              data['statusCode'] ??
+              409, // Usamos el código que viene en el JSON
+        };
+      }
+
+      // Si es verdadero éxito
+      return {
+        'success': true,
+        'tipo': data['tipo'],
+        'hora': data['hora'],
+        'estado': data['estado'],
+        'message': data['message'] ?? 'Registro exitoso',
+      };
+    }
+
+    // 4. Manejo de errores estándar HTTP (409, 403, 500 fuera del try/catch del backend)
+    if (response.statusCode == 409) {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Ya existe un registro.',
+        'errorType': 'Conflict',
+        'statusCode': 409,
+      };
+    }
+
+    return {
+      'success': false,
+      'message': data['message'] ?? 'Error desconocido.',
+      'errorType': data['error'] ?? 'ServerError',
+      'statusCode': response.statusCode,
+    };
+    } catch (e) {
+      print('🔥 [AttendanceService] Error en la petición: $e');
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e',
+        'errorType': 'ConnectionError',
+        'statusCode': 500,
+      };
+    } finally {
+      _requestInProgress = false;
+      print('✅ [AttendanceService] Petición finalizada, candado liberado');
     }
   }
 
