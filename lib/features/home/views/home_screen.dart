@@ -590,7 +590,7 @@ final List<Map<String, String>> categorias = [
     "ruta": AppRoutes.registroManual,
   },
   {
-    "nombre": "Homework",
+    "nombre": "Notificaciones",
     "asset": "lib/assets/images/Homework.svg",
     "ruta": AppRoutes.notificaciones,
   },

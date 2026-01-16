@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:auth_company/features/user/services/user_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CustomHomeAppBar extends StatefulWidget implements PreferredSizeWidget {
   // 1. Agregamos el callback
   final VoidCallback? onMenuPressed;
 
@@ -8,6 +10,39 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(75.0);
+
+  @override
+  State<CustomHomeAppBar> createState() => _CustomHomeAppBarState();
+}
+
+class _CustomHomeAppBarState extends State<CustomHomeAppBar> {
+  final UserService _userService = UserService();
+  String _avatarUrl = '';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString('user_uid') ?? '';
+    final token = prefs.getString('access_token') ?? '';
+
+    if (uid.isNotEmpty && token.isNotEmpty) {
+      final userData = await _userService.getProfile(uid, token);
+      if (userData != null) {
+        setState(() {
+          _avatarUrl = userData['avatar'] ?? '';
+          _isLoading = false;
+        });
+      }
+    } else {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +84,7 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                           size: 30,
                         ),
                         onPressed:
-                            onMenuPressed ??
+                            widget.onMenuPressed ??
                             () =>
                                 Scaffold.of(
                                   context,
@@ -90,9 +125,11 @@ class CustomHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                               ),
                             ],
                             image: DecorationImage(
-                              image: NetworkImage(
-                                'https://i.pinimg.com/564x/bb/dd/e3/bbdde34ccf2b181ba62d1d42ba002c5b.jpg',
-                              ),
+                              image: _isLoading 
+                                  ? const AssetImage('assets/images/perfil.png') as ImageProvider
+                                  : (_avatarUrl.isNotEmpty 
+                                      ? NetworkImage(_avatarUrl)
+                                      : const AssetImage('assets/images/perfil.png') as ImageProvider),
                               fit: BoxFit.cover,
                             ),
                           ),

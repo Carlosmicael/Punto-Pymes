@@ -788,7 +788,7 @@ class RegistroModal extends StatelessWidget {
           Row(
             children: [
               // Icono circular (Mismo estilo que tenías)
-              Container(
+              /*Container(
                 width: 40,
                 height: 40,
                 padding: const EdgeInsets.all(10),
@@ -797,7 +797,7 @@ class RegistroModal extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: SvgPicture.asset(iconPath, color: Colors.white),
-              ),
+              ),*/
               SizedBox(width: width * 0.03),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -891,7 +891,7 @@ class RegistroModal extends StatelessWidget {
             Text(
               "Lat: ${data['latitud'].toStringAsFixed(4)}, Lng: ${data['longitud'].toStringAsFixed(4)}",
               style: TextStyle(
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white70,
                 fontSize: 10,
               ),
             ),

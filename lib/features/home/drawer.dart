@@ -3,17 +3,53 @@ import 'package:auth_company/features/home/home_layout.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart'; // Necesario para SvgPicture
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:auth_company/features/user/services/user_service.dart';
 import 'package:auth_company/features/kpis/views/kpis.dart';
 
-class AppDrawer extends StatelessWidget {
+class AppDrawer extends StatefulWidget {
   // 1. PROPIEDADES ACTUALIZADAS (Tomadas del drawer.dart original)
   final Widget? miniChild;
   final void Function(Widget widget)? onMiniaturaSelected;
 
   // Se remueve 'this.screenImage'
   const AppDrawer({super.key, this.miniChild, this.onMiniaturaSelected});
+
+  @override
+  State<AppDrawer> createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer> {
+  final UserService _userService = UserService();
+  String _avatarUrl = '';
+  String _userName = 'Usuario';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString('user_uid') ?? '';
+    final token = prefs.getString('access_token') ?? '';
+
+    if (uid.isNotEmpty && token.isNotEmpty) {
+      final userData = await _userService.getProfile(uid, token);
+      if (userData != null) {
+        setState(() {
+          _avatarUrl = userData['avatar'] ?? '';
+          _userName = '${userData['nombre'] ?? ''} ${userData['apellido'] ?? ''}'.trim();
+          _isLoading = false;
+        });
+      }
+    } else {
+      setState(() => _isLoading = false);
+    }
+  }
 
   // 2. Función interna para manejar la navegación de KPIs
   Future<void> _navigateToKpis(BuildContext context) async {
@@ -84,8 +120,8 @@ class AppDrawer extends StatelessWidget {
         "ruta": AppRoutes.notificaciones, // Asumo esta ruta de ejemplo
       },
       {
-        "nombre": "Registro Scan",
-        "asset": "lib/assets/images/Horario.svg",
+        "nombre": "Registro Huella",
+        "asset": "lib/assets/images/Registro.svg",
         "ruta": AppRoutes.registroScan, // Asumo esta ruta de ejemplo
       },
       {
@@ -172,17 +208,19 @@ class AppDrawer extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
-                              image: const DecorationImage(
-                                image: NetworkImage(
-                                  'https://ichef.bbci.co.uk/ace/ws/640/cpsprodpb/9db5/live/48fd9010-c1c1-11ee-9519-97453607d43e.jpg.webp',
-                                ), // Imagen de perfil de ejemplo
+                              image: DecorationImage(
+                                image: _isLoading 
+                                    ? const AssetImage('assets/images/perfil.png') as ImageProvider
+                                    : (_avatarUrl.isNotEmpty 
+                                        ? NetworkImage(_avatarUrl)
+                                        : const AssetImage('assets/images/perfil.png') as ImageProvider),
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            "Carlos Lopez", // Nombre de usuario de ejemplo
+                            _isLoading ? 'Cargando...' : _userName,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: size.width * 0.035,
@@ -376,13 +414,13 @@ class AppDrawer extends StatelessWidget {
 
                         // 3. SECCIÓN DE MINIATURA CON miniChild (Tomada de drawer.dart original)
                         // Se mantiene solo la miniatura más grande para simplificar
-                        if (miniChild != null)
+                        if (widget.miniChild != null)
                           GestureDetector(
                             onTap: () {
-                              if (onMiniaturaSelected != null &&
-                                  miniChild != null) {
+                              if (widget.onMiniaturaSelected != null &&
+                                  widget.miniChild != null) {
                                 // Llama a la función si está definida
-                                onMiniaturaSelected!(miniChild!);
+                                widget.onMiniaturaSelected!(widget.miniChild!);
                               }
                             },
                             child: ClipRect(
@@ -408,7 +446,7 @@ class AppDrawer extends StatelessWidget {
                                             width: size.width,
                                             height: size.height,
                                             child:
-                                                miniChild ??
+                                                widget.miniChild ??
                                                 Container(
                                                   color: const Color.fromARGB(
                                                     0,
