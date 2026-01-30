@@ -12,6 +12,7 @@ import 'secciones/form_section.dart';
 import 'secciones/location_section.dart';
 import 'secciones/image_section.dart';
 import 'secciones/actions_section.dart';
+import 'utils/default_values.dart';
 
 // Importar el modelo centralizado
 import 'models/genero.dart';
@@ -504,49 +505,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() {
       _preRegistroData = data;
 
-      // Datos personales
-      _nombresController.text = data['nombre'] ?? '';
-      _apellidosController.text = data['apellido'] ?? '';
-      _correoController.text = data['correo'] ?? '';
-      _telefonoController.text = data['telefono'] ?? '';
+      // Datos personales - usando valores predeterminados
+      _nombresController.text = DefaultValues.getValue(data, 'nombre', DefaultValues.nombre);
+      _apellidosController.text = DefaultValues.getValue(data, 'apellido', DefaultValues.apellido);
+      _correoController.text = DefaultValues.getValue(data, 'correo', DefaultValues.correo);
+      _telefonoController.text = DefaultValues.getValue(data, 'telefono', DefaultValues.telefono);
 
-      // Datos de empresa
-      _empresaController.text = data['empresaNombre'] ?? 'Empresa no asignada';
-      _sucursalController.text =
-          data['sucursalNombre'] ?? 'Sucursal no asignada';
+      // Datos de empresa - usando valores predeterminados
+      _empresaController.text = DefaultValues.getValue(data, 'empresaNombre', DefaultValues.empresaNombre);
+      _sucursalController.text = DefaultValues.getValue(data, 'sucursalNombre', DefaultValues.sucursalNombre);
 
       // Limpiar marcadores (por seguridad)
       _markers.clear();
 
-      // Coordenadas (solo si existen)
-      if (data['latitud'] != null && data['longitud'] != null) {
-        _mapCenter = LatLng(
-          (data['latitud'] as num).toDouble(),
-          (data['longitud'] as num).toDouble(),
-        );
+      // Coordenadas - usando valores predeterminados si no existen
+      final latitud = DefaultValues.getValue(data, 'latitud', DefaultValues.latitudDefecto);
+      final longitud = DefaultValues.getValue(data, 'longitud', DefaultValues.longitudDefecto);
+      
+      _mapCenter = LatLng(latitud, longitud);
 
-        _markers.add(
-          Marker(
-            markerId: const MarkerId('branch_location'),
-            position: _mapCenter,
-            infoWindow: InfoWindow(
-              title: data['sucursalNombre'] ?? 'Ubicación de Sucursal',
-              snippet: data['empresaNombre'],
-            ),
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('branch_location'),
+          position: _mapCenter,
+          infoWindow: InfoWindow(
+            title: DefaultValues.getValue(data, 'sucursalNombre', DefaultValues.sucursalNombre),
+            snippet: DefaultValues.getValue(data, 'empresaNombre', DefaultValues.empresaNombre),
           ),
-        );
-      }
+        ),
+      );
 
-      // Género
-      if (data['genero'] != null) {
-        final generoStr = (data['genero'] as String).toLowerCase();
-        _selectedGender =
-            generoStr == 'masculino' ? Genero.masculino : Genero.femenino;
-      }
+      // Género - usando valor predeterminado
+      final generoStr = DefaultValues.getValue(data, 'genero', DefaultValues.genero);
+      _selectedGender = generoStr.toString().toLowerCase() == 'masculino' 
+          ? Genero.masculino 
+          : Genero.femenino;
 
-      // Fecha de nacimiento (si luego la agregan en backend)
-      if (data['fechaNacimiento'] != null) {
-        _selectedDate = DateTime.parse(data['fechaNacimiento']);
+      // Fecha de nacimiento - usando valor predeterminado
+      final fechaStr = DefaultValues.getValue(data, 'fechaNacimiento', '');
+      if (fechaStr.isNotEmpty) {
+        _selectedDate = DateTime.parse(fechaStr);
+      } else {
+        _selectedDate = DefaultValues.fechaNacimientoDefecto;
       }
 
       if (data['latitud'] != null && data['longitud'] != null) {
