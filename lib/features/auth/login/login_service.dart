@@ -39,6 +39,24 @@ class LoginService {
     }
   }
 
+  Future<Map<String, dynamic>> getBranchConfig(String token) async {
+    final url = Uri.parse(sucursalConfigUrl);
+
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Error al obtener configuración de sucursal");
+    }
+  }
+
   /// Recupera el token guardado en SharedPreferences
   Future<String?> getSavedToken() async {
     final prefs = await SharedPreferences.getInstance();

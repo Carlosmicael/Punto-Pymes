@@ -1,6 +1,12 @@
+import 'package:auth_company/features/tracking/location_tracking_service.dart';
+import 'package:auth_company/features/tracking/services/branch_config_service.dart';
+import 'package:auth_company/features/tracking/services/socket_service.dart';
+import 'package:auth_company/location_permission_service.dart';
 import 'package:flutter/material.dart';
 import 'package:auth_company/routes/app_routes.dart';
 import 'login_service.dart'; // Importamos el servicio
+import 'package:auth_company/auth_storage.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   final LoginService _loginService = LoginService(); // Instancia del servicio
+  
 
   /// Función que valida el formulario y llama al servicio de login
   void _validateAndLogin() async {
@@ -25,13 +32,68 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
 
+
+
       if (token != null) {
-        // Si el login fue exitoso, navega al Home
+        bool granted = await LocationPermissionService.requestPermissions();
+        AuthStorage.saveToken(token);
+
+        print("PERMISOS DE UBICACIÓN: $granted");
+
+        if (!granted) {
+          print("Permisos de ubicación denegados");
+          return;
+        }
+
+        print("TOKEN: $token");
+
+        final branchData = await _loginService.getBranchConfig(token);
+        print("DATOS DE SUCURSAL: $branchData");
+
+        await BranchConfigService.saveBranchConfig(
+          lat: branchData['latitud'],
+          lng: branchData['longitud'],
+          radius: branchData['rangoGeografico'],
+          threshold: branchData['umbral'], 
+          uid: branchData['uid'],
+          companyId: branchData['companyId'],
+          branchId: branchData['branchId'],
+        );
+
+        var uid = await BranchConfigService.getUid();
+        print("DATOS GUARDADOS EN EL DISPOSITIVO: $uid");
+
+
+        String userId = branchData['uid'];
+        String companyId = branchData['companyId'];
+        String branchId = branchData['branchId'];
+
+        print("DATOS DE EMPRESA: $companyId");
+        print("DATOS DE SUCURSAL: $branchId");
+        print("DATOS DE USUARIO: $userId");
+        
+
+        SocketService.connect(
+          userId: userId,
+          companyId: companyId,
+          branchId: branchId,
+        );
+
+        print("SOCKET CONECTADO");
+
+        await LocationTrackingService.startTracking();
+        print("TRACKING INICIADO");
+
+
         Navigator.pushReplacementNamed(context, AppRoutes.home);
-      } else {
-        // Si falló, muestra un mensaje de error
+      }else {
         _showErrorDialog();
       }
+
+
+
+
+
     }
   }
 

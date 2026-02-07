@@ -53,6 +53,15 @@ dependencies:
   local_auth: ^3.0.0
   carousel_slider: ^5.1.1
   file_picker: ^10.3.8
+  flutter_background_service: ^5.0.5
+  fluttertoast: ^8.2.4
+  jwt_decoder: ^2.0.1
+  socket_io_client: ^2.0.3+1
+  flutter_local_notifications: ^17.2.1+2
+  timezone: ^0.9.4
+
+
+
 
 dev_dependencies:
   flutter_test:

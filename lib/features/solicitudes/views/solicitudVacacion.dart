@@ -216,7 +216,7 @@ class _SolicitudVacacionesState extends State<SolicitudVacaciones> {
               _buildCard(
                 title: "Tipo de solicitud",
                 child: DropdownButtonFormField<String>(
-                  value: _tipoSeleccionado,
+                  initialValue: _tipoSeleccionado,
                   items:
                       _tipos
                           .map(

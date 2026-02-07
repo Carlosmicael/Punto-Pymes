@@ -2,9 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart'; // Agrega esto
-import 'package:auth_company/features/auth/login/login_service.dart';
 import 'package:auth_company/config.dart';
-import 'package:auth_company/features/registro_asistencia/services/attendance_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Servicio encargado de manejar la lógica de perfil (Lectura y Actualización).

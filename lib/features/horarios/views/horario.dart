@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/horario_service.dart';
 import 'package:auth_company/features/registro_asistencia/services/attendance_service.dart';
 

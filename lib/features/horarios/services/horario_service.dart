@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 // Donde tengas tu BASE_URL
 
 class HorarioService {

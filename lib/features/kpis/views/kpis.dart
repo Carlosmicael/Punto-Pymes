@@ -308,7 +308,7 @@ class _KpisScreenState extends State<KpisScreen> {
                                         (tarea) =>
                                             _cardTarea(tarea, width, height),
                                       )
-                                      .toList(),
+                                      ,
                                   SizedBox(height: height * 0.03),
                                 ],
                                 SizedBox(height: height * 0.07),

@@ -14,6 +14,7 @@ import 'secciones/image_section.dart';
 import 'secciones/actions_section.dart';
 import 'utils/default_values.dart';
 
+
 // Importar el modelo centralizado
 import 'models/genero.dart';
 
@@ -55,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   ///mapa localizacion///
   LatLng _mapCenter = const LatLng(0, 0);
   final Set<Marker> _markers = {};
-  bool _isKeyboardVisible = false;
+  final bool _isKeyboardVisible = false;
   bool _locationDenied = false;
 
   ///selector de imagenes//

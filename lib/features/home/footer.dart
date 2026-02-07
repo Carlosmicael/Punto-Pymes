@@ -143,7 +143,7 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
                   children: [
                     leftSpacer,
 
-                    Container(
+                    SizedBox(
                       width: iconSize * 0.8,
                       height: iconSize * 0.8,
                       child: Image.asset(
@@ -180,7 +180,7 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
                   duration: _fadeDuration,
                   curve: Curves.easeInOut,
                   opacity: targetOpacity,
-                  child: Container(
+                  child: SizedBox(
                     width: iconSize,
                     height: iconSize,
                     child: Image.asset(
@@ -207,17 +207,17 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
     final double pointerWidth = navBarWidth * 0.38;
     final double iconAreaWidth = navBarWidth / _navItems.length;
 
-    final double _POSITION_OFFSET = width * 0.035;
+    final double positionOffset = width * 0.035;
 
     final double center0 = iconAreaWidth / 2;
     final double center1 = iconAreaWidth * 1.5;
     final double center2 = iconAreaWidth * 2.5;
 
-    final double left0 = center0 - (pointerWidth / 2) + _POSITION_OFFSET;
+    final double left0 = center0 - (pointerWidth / 2) + positionOffset;
 
     final double left1 = center1 - (pointerWidth / 2);
 
-    final double left2 = center2 - (pointerWidth / 2) - _POSITION_OFFSET;
+    final double left2 = center2 - (pointerWidth / 2) - positionOffset;
 
     //este seria el movimiento que hace el cuadro blanco calculado dinamicamente y pasado al animate
     final double targetLeft =
@@ -275,7 +275,7 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
                 ),
 
                 //ultima base los iconos los 3 iconos incluyendo el texto y circulo verde
-                Container(
+                SizedBox(
                   width: navBarWidth,
                   height: containerHeight,
                   child: Row(
@@ -307,7 +307,7 @@ class _AnimatedFloatingFooterState extends State<AnimatedFloatingFooter> {
                 ],
               ),
               child: Center(
-                child: Container(
+                child: SizedBox(
                   width: iconSize * 0.9,
                   height: iconSize * 0.9,
                   child: Image.asset(

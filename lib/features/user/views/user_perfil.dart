@@ -226,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             
-            Container(
+            SizedBox(
               width: width * 0.8, // Más ancho
               height: size.height * 0.08, // Más alto
               child: ElevatedButton(

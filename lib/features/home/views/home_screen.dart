@@ -1,3 +1,4 @@
+import 'package:auth_company/features/tracking/services/branch_config_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -183,6 +184,8 @@ class HomeBody extends StatefulWidget {
   State<HomeBody> createState() => _HomeBodyState();
 }
 
+// ... (todo tu código anterior se mantiene igual hasta _HomeBodyState)
+
 class _HomeBodyState extends State<HomeBody> {
   final NotificacionesService _notifService = NotificacionesService();
 
@@ -207,7 +210,6 @@ class _HomeBodyState extends State<HomeBody> {
       final data = await _notifService.getNotificaciones(token);
 
       setState(() {
-        // Solo necesitamos imágenes para el carrusel
         notificaciones =
             data
                 .where((n) => n['imagen'] != null && n['imagen'] != '')
@@ -220,6 +222,104 @@ class _HomeBodyState extends State<HomeBody> {
         loadingNotificaciones = false;
       });
     }
+  }
+
+  // 🔥 NUEVO: Mostrar diálogo con datos de SharedPreferences
+  Future<void> _mostrarConfigSucursal() async {
+    final lat = await BranchConfigService.getLat();
+    final lng = await BranchConfigService.getLng();
+    final radius = await BranchConfigService.getRadius();
+    final threshold = await BranchConfigService.getThreshold();
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.location_on, color: Color(0xFFE41335)),
+            SizedBox(width: 8),
+            Text(
+              'Configuración Sucursal',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildConfigItem('Latitud:', lat.toStringAsFixed(6)),
+            const Divider(height: 16),
+            _buildConfigItem('Longitud:', lng.toStringAsFixed(6)),
+            const Divider(height: 16),
+            _buildConfigItem('Radio (metros):', radius.toStringAsFixed(1)),
+            const Divider(height: 16),
+            _buildConfigItem('Umbral (metros):', threshold.toStringAsFixed(1)),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE41335).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE41335).withOpacity(0.3)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, color: Color(0xFFE41335), size: 16),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Estos valores se actualizan automáticamente cuando cambian en el servidor.',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF370B12)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cerrar',
+              style: TextStyle(color: Color(0xFFE41335)),
+            ),
+          ),
+        ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfigItem(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF370B12),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFE41335),
+            fontFamily: 'monospace',
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -254,8 +354,6 @@ class _HomeBodyState extends State<HomeBody> {
                     return GestureDetector(
                       onTap: () {
                         Navigator.pushNamed(context, AppRoutes.notificaciones);
-                        // 👉 Si luego cambias el nombre:
-                        // AppRoutes.notificaciones
                       },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
@@ -280,6 +378,67 @@ class _HomeBodyState extends State<HomeBody> {
 
           // ===============================================================
           SizedBox(height: screenHeight * 0.03),
+
+          // 🔥 NUEVO: BOTÓN PARA VER CONFIGURACIÓN DE SUCURSAL (SOCKET)
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingH),
+            child: Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE41335), Color(0xFF370B12)],
+                ),
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _mostrarConfigSucursal,
+                  borderRadius: BorderRadius.circular(25),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: screenHeight * 0.02,
+                      horizontal: screenWidth * 0.05,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.wifi_tethering,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        SizedBox(width: screenWidth * 0.03),
+                        const Text(
+                          'Ver Configuración Socket',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white70,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
           // 🔹 Últimas asistencias
           Padding(
@@ -375,6 +534,7 @@ class _HomeBodyState extends State<HomeBody> {
                                     gradient: const LinearGradient(
                                       colors: [
                                         Color(0xFFE41335),
+                                        Color(0xFFE41335),
                                         Color(0xFF370B12),
                                       ],
                                     ),
@@ -411,6 +571,7 @@ class _HomeBodyState extends State<HomeBody> {
             ),
           ),
 
+          // ... (resto del código se mantiene igual)
           SizedBox(height: screenHeight * 0.04),
           _buildInfoBox(
             screenWidth,
@@ -436,6 +597,7 @@ class _HomeBodyState extends State<HomeBody> {
     );
   }
 
+  // ... (resto de métodos se mantienen igual)
   Widget _buildInfoBox(
     double screenWidth,
     double height,
@@ -503,7 +665,6 @@ class _HomeBodyState extends State<HomeBody> {
     );
   }
 }
-
 //pantallaPrincipal//
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
